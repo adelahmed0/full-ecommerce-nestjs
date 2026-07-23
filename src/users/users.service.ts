@@ -8,11 +8,11 @@ import { Model } from 'mongoose';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
   create(createUserDto: CreateUserDto) {
-    return this.userModel.create(createUserDto);
+    return 'This action adds a new user';
   }
 
   findAll() {
-    return this.userModel.find();
+    return `This action returns all users`;
   }
 
   findOne(id: number) {
