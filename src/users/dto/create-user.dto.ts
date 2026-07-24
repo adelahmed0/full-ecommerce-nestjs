@@ -3,16 +3,18 @@ import {
   IsEmail,
   IsEnum,
   IsIn,
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   IsUrl,
+  Length,
+  Matches,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
-import { UserActive, UserGender, UserRole } from '../enums/user.enum';
+import { UserGender, UserRole } from '../enums/user.enum';
 
 export class CreateUserDto {
   @IsString({ message: 'Name must be a string' })
@@ -39,11 +41,15 @@ export class CreateUserDto {
   avatar?: string;
 
   @IsOptional()
-  @IsNumber({}, { message: 'Age must be a number' })
+  @IsInt({ message: 'Age must be an integer' })
+  @Min(1, { message: 'Age must be at least 1' })
   age?: number;
 
   @IsOptional()
-  @IsPhoneNumber('EG', { message: 'Invalid phone number' })
+  @IsString({ message: 'Phone number must be a string' })
+  @Matches(/^01[0125][0-9]{8}$/, {
+    message: 'Phone number must be a valid Egyptian mobile number (11 digits)',
+  })
   phoneNumber?: string;
 
   @IsOptional()
@@ -52,17 +58,15 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsBoolean({ message: 'Active must be a boolean' })
-  @IsIn([UserActive.ACTIVE, UserActive.INACTIVE], {
-    message: 'Active must be true or false',
-  })
-  active?: UserActive;
+  active?: boolean;
 
   @IsOptional()
   @IsString({ message: 'Verification code must be a string' })
+  @Length(6, 6, { message: 'Verification code must be 6 characters long' })
   verificationCode?: string;
 
   @IsOptional()
-  @IsIn([UserGender.MALE, UserGender.FEMALE], {
+  @IsIn(Object.values(UserGender), {
     message: 'Gender must be male or female',
   })
   gender?: UserGender;
