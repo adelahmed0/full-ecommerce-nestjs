@@ -17,26 +17,29 @@ import {
 import { UserGender, UserRole } from '../enums/user.enum';
 
 export class CreateUserDto {
-  @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
+  @IsString({ message: 'Name must be a string' })
   @MinLength(3, { message: 'Name must be at least 3 characters' })
   @MaxLength(30, { message: 'Name must be at most 30 characters' })
   name: string;
 
-  @IsEmail({}, { message: 'Invalid email' })
   @IsNotEmpty({ message: 'Email is required' })
+  @IsString({ message: 'Email must be a string' })
+  @IsEmail({}, { message: 'Invalid email' })
   email: string;
 
-  @IsString({ message: 'Password must be a string' })
   @IsNotEmpty({ message: 'Password is required' })
+  @IsString({ message: 'Password must be a string' })
   @MinLength(3, { message: 'Password must be at least 3 characters' })
   @MaxLength(20, { message: 'Password must be at most 20 characters' })
   password: string;
 
+  @IsNotEmpty({ message: 'Role is required' })
   @IsEnum(UserRole, { message: 'Role must be admin or user' })
   role: UserRole;
 
   @IsOptional()
+  @IsString({ message: 'Avatar must be a string' })
   @IsUrl({}, { message: 'Invalid avatar URL' })
   avatar?: string;
 
@@ -66,6 +69,7 @@ export class CreateUserDto {
   verificationCode?: string;
 
   @IsOptional()
+  @IsString({ message: 'Gender must be a string' })
   @IsIn(Object.values(UserGender), {
     message: 'Gender must be male or female',
   })
