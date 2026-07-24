@@ -9,8 +9,9 @@ export class User {
   @Prop({
     required: true,
     type: String,
-    min: [3, 'Name must be at least 3 characters long'],
-    max: [30, 'Name must be less than 30 characters long'],
+    trim: true,
+    minlength: [3, 'Name must be at least 3 characters long'],
+    maxlength: [30, 'Name must be at most 30 characters long'],
   })
   name: string;
 
@@ -18,45 +19,58 @@ export class User {
     required: true,
     type: String,
     unique: true,
+    lowercase: true,
+    trim: true,
   })
   email: string;
 
   @Prop({
     required: true,
     type: String,
-    min: [3, 'Password must be at least 8 characters long'],
-    max: [20, 'Password must be less than 20 characters long'],
+    minlength: [3, 'Password must be at least 3 characters long'],
+    maxlength: [20, 'Password must be at most 20 characters long'],
+    select: false,
   })
   password: string;
 
   @Prop({
     required: true,
     type: String,
-    enum: UserRole,
+    enum: Object.values(UserRole),
     default: UserRole.USER,
   })
   role: UserRole;
 
   @Prop({
     type: String,
+    required: false,
     default: null,
   })
-  avatar: string | null;
+  avatar?: string | null;
 
   @Prop({
     type: Number,
+    required: false,
+    min: [1, 'Age must be at least 1'],
   })
-  age: number;
+  age?: number;
 
   @Prop({
     type: String,
+    required: false,
+    match: [
+      /^01[0125][0-9]{8}$/,
+      'phoneNumber must be a valid Egyptian mobile number (11 digits)',
+    ],
   })
-  phoneNumber: string;
+  phoneNumber?: string;
 
   @Prop({
     type: String,
+    required: false,
+    trim: true,
   })
-  address: string;
+  address?: string;
 
   @Prop({
     type: Boolean,
@@ -66,15 +80,18 @@ export class User {
 
   @Prop({
     type: String,
+    required: false,
     default: null,
+    select: false,
   })
-  verificationCode: string | null;
+  verificationCode?: string | null;
 
   @Prop({
     type: String,
-    enum: UserGender,
+    required: false,
+    enum: Object.values(UserGender),
   })
-  gender: UserGender;
+  gender?: UserGender;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
