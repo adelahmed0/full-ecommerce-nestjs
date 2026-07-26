@@ -34,9 +34,9 @@ export class CreateUserDto {
   @MaxLength(20, { message: 'Password must be at most 20 characters' })
   password: string;
 
-  @IsNotEmpty({ message: 'Role is required' })
+  @IsOptional()
   @IsEnum(UserRole, { message: 'Role must be admin or user' })
-  role: UserRole;
+  role?: UserRole;
 
   @IsOptional()
   @IsString({ message: 'Avatar must be a string' })
