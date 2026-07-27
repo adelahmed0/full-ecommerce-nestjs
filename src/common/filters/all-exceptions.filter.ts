@@ -26,12 +26,15 @@ const DUPLICATE_KEY_CODE = 11000;
 function isDuplicateKeyError(
   exception: unknown,
 ): exception is { code: number; keyValue?: Record<string, unknown> } {
-  return (
-    typeof exception === 'object' &&
-    exception !== null &&
-    'code' in exception &&
-    (exception as { code: unknown }).code === DUPLICATE_KEY_CODE
-  );
+  if (
+    typeof exception !== 'object' ||
+    exception === null ||
+    !('code' in exception)
+  ) {
+    return false;
+  }
+
+  return exception.code === DUPLICATE_KEY_CODE;
 }
 
 @Catch()
@@ -46,7 +49,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Unexpected failures must never leak internals to the client, so the real
     // cause is only written to the server log.
-    if (body.statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (body.statusCode >= 500) {
       this.logger.error(
         `${request.method} ${request.originalUrl} -> ${body.statusCode}`,
         exception instanceof Error ? exception.stack : String(exception),
@@ -78,7 +81,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Validation failed',
-        errors: { [exception.path]: `${labelFor(exception.path)} is not valid` },
+        errors: {
+          [exception.path]: `${labelFor(exception.path)} is not valid`,
+        },
       };
     }
 
