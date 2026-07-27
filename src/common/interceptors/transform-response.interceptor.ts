@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
 import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator';
+import { ApiMessage } from '../enums/api-message.enum';
 
 export interface SuccessResponseBody<T> {
   statusCode: number;
@@ -16,12 +17,12 @@ export interface SuccessResponseBody<T> {
 }
 
 // Used when a handler carries no @ResponseMessage of its own.
-const FALLBACK_MESSAGES: Record<string, string> = {
-  GET: 'Fetched successfully',
-  POST: 'Created successfully',
-  PUT: 'Updated successfully',
-  PATCH: 'Updated successfully',
-  DELETE: 'Deleted successfully',
+const FALLBACK_MESSAGES: Record<string, ApiMessage> = {
+  GET: ApiMessage.FETCHED,
+  POST: ApiMessage.CREATED,
+  PUT: ApiMessage.UPDATED,
+  PATCH: ApiMessage.UPDATED,
+  DELETE: ApiMessage.DELETED,
 };
 
 @Injectable()
@@ -45,7 +46,7 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
         [context.getHandler(), context.getClass()],
       ) ??
       FALLBACK_MESSAGES[request.method] ??
-      'Success';
+      ApiMessage.SUCCESS;
 
     return next.handle().pipe(
       map((data) => ({
