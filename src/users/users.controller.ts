@@ -61,8 +61,11 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([UserRole.ADMIN])
+  @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_DELETED)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 }

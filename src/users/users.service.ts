@@ -74,7 +74,11 @@ export class UsersService {
     return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.userModel.findByIdAndDelete(id).exec();
+    if (!user) {
+      throw new NotFoundException(ApiMessage.USER_NOT_FOUND);
+    }
+    return user;
   }
 }
