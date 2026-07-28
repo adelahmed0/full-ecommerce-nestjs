@@ -34,6 +34,9 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([UserRole.ADMIN])
+  @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USERS_FETCHED)
   findAll() {
     return this.usersService.findAll();
