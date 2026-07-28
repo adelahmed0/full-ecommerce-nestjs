@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { Serialize } from '../common/decorators/serialize.decorator';
 import { ApiMessage } from '../common/enums/api-message.enum';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -38,8 +40,8 @@ export class UsersController {
   @Roles([UserRole.ADMIN])
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USERS_FETCHED)
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')

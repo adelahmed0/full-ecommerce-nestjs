@@ -7,9 +7,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { ApiMessage } from '../common/enums/api-message.enum';
+import {
+  buildPaginatedResult,
+  PaginatedResult,
+} from '../common/dto/paginated-result';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
@@ -32,8 +37,19 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return this.userModel.find().exec();
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<UserDocument, 'users'>> {
+    const page = query.page;
+    const perPage = query.per_page;
+    const skip = (page - 1) * perPage;
+
+    const [items, total] = await Promise.all([
+      this.userModel.find().skip(skip).limit(perPage).exec(),
+      this.userModel.countDocuments().exec(),
+    ]);
+
+    return buildPaginatedResult('users', items, total, page, perPage);
   }
 
   async findOne(id: string) {
