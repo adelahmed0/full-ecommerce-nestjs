@@ -43,9 +43,12 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([UserRole.ADMIN])
+  @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_FETCHED)
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
