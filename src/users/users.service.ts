@@ -7,14 +7,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { ApiMessage } from '../common/enums/api-message.enum';
-import {
-  buildPaginatedResult,
-  PaginatedResult,
-} from '../common/dto/paginated-result';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { buildPaginatedResult } from '../common/dto/paginated-result';
 import { CreateUserDto } from './dto/create-user.dto';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './schemas/user.schema';
+import { User } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
@@ -37,19 +34,43 @@ export class UsersService {
     });
   }
 
-  async findAll(
-    query: PaginationQueryDto,
-  ): Promise<PaginatedResult<UserDocument, 'users'>> {
-    const page = query.page;
-    const perPage = query.per_page;
-    const skip = (page - 1) * perPage;
+  async findAll(query: FindUsersQueryDto) {
+    const {
+      page,
+      per_page,
+      search,
+      role,
+      gender,
+      active,
+      phoneNumber,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query;
 
-    const [items, total] = await Promise.all([
-      this.userModel.find().skip(skip).limit(perPage).exec(),
-      this.userModel.countDocuments().exec(),
+    const filter: Record<string, unknown> = {};
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (role) filter.role = role;
+    if (gender) filter.gender = gender;
+    if (active !== undefined) filter.active = active === 'true';
+    if (phoneNumber) filter.phoneNumber = phoneNumber;
+
+    const [users, total] = await Promise.all([
+      this.userModel
+        .find(filter)
+        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+        .skip((page - 1) * per_page)
+        .limit(per_page)
+        .exec(),
+      this.userModel.countDocuments(filter).exec(),
     ]);
 
-    return buildPaginatedResult('users', items, total, page, perPage);
+    return buildPaginatedResult('users', users, total, page, per_page);
   }
 
   async findOne(id: string) {

@@ -15,12 +15,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { Serialize } from '../common/decorators/serialize.decorator';
 import { ApiMessage } from '../common/enums/api-message.enum';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from './enums/user.enum';
 import { UserResponseDto } from './dto/user-response.dto';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,7 +40,7 @@ export class UsersController {
   @Roles([UserRole.ADMIN])
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USERS_FETCHED)
-  findAll(@Query() query: PaginationQueryDto) {
+  findAll(@Query() query: FindUsersQueryDto) {
     return this.usersService.findAll(query);
   }
 
