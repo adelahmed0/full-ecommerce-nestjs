@@ -52,8 +52,9 @@ export class User {
     type: Number,
     required: false,
     min: [1, 'Age must be at least 1'],
+    default: null,
   })
-  age?: number;
+  age?: number | null;
 
   @Prop({
     type: String,
@@ -62,15 +63,17 @@ export class User {
       /^01[0125][0-9]{8}$/,
       'phoneNumber must be a valid Egyptian mobile number (11 digits)',
     ],
+    default: null,
   })
-  phoneNumber?: string;
+  phoneNumber?: string | null;
 
   @Prop({
     type: String,
     required: false,
     trim: true,
+    default: null,
   })
-  address?: string;
+  address?: string | null;
 
   @Prop({
     type: Boolean,
@@ -89,9 +92,10 @@ export class User {
   @Prop({
     type: String,
     required: false,
-    enum: Object.values(UserGender),
+    enum: [...Object.values(UserGender), null],
+    default: null,
   })
-  gender?: UserGender;
+  gender?: UserGender | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
