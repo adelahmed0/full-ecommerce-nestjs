@@ -52,9 +52,12 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([UserRole.ADMIN])
+  @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_UPDATED)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')

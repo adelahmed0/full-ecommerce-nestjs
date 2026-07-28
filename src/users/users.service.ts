@@ -44,9 +44,34 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    void updateUserDto;
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.email) {
+      const emailTaken = await this.userModel.exists({
+        email: updateUserDto.email,
+        _id: { $ne: id },
+      });
+      if (emailTaken) {
+        throw new ConflictException({
+          message: ApiMessage.USER_ALREADY_EXISTS,
+          errors: { email: 'Email is already taken' },
+        });
+      }
+    }
+
+    const payload = { ...updateUserDto };
+    if (payload.password) {
+      payload.password = await bcrypt.hash(payload.password, 10);
+    }
+
+    const user = await this.userModel
+      .findByIdAndUpdate(id, payload, { new: true })
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(ApiMessage.USER_NOT_FOUND);
+    }
+
+    return user;
   }
 
   remove(id: number) {
