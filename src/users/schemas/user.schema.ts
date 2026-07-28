@@ -99,3 +99,31 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+function sanitizeUser(
+  _doc: unknown,
+  ret: {
+    _id?: unknown;
+    id?: string;
+    password?: string;
+    verificationCode?: string | null;
+  },
+) {
+  ret.id = String(ret._id);
+  delete ret._id;
+  delete ret.password;
+  delete ret.verificationCode;
+  return ret;
+}
+
+UserSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: sanitizeUser,
+});
+
+UserSchema.set('toObject', {
+  virtuals: true,
+  versionKey: false,
+  transform: sanitizeUser,
+});
