@@ -1,5 +1,6 @@
 import { Type } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { isPaginatedResult } from '../dto/paginated-result';
 
 function toPlain(value: unknown): unknown {
   if (
@@ -14,16 +15,28 @@ function toPlain(value: unknown): unknown {
   return value;
 }
 
-export function serializeToDto<T>(data: unknown, dto: Type<T>): T | T[] {
-  if (Array.isArray(data)) {
-    return data.map((item) =>
-      plainToInstance(dto, toPlain(item) as object, {
-        excludeExtraneousValues: true,
-      }),
-    );
-  }
-
-  return plainToInstance(dto, toPlain(data) as object, {
+function toDtoInstance<T>(item: unknown, dto: Type<T>): T {
+  return plainToInstance(dto, toPlain(item) as object, {
     excludeExtraneousValues: true,
   });
+}
+
+export function serializeToDto<T>(data: unknown, dto: Type<T>): unknown {
+  if (isPaginatedResult(data)) {
+    const serialized: Record<string, unknown> = { ...data };
+
+    for (const [key, value] of Object.entries(data)) {
+      if (key !== 'pagination' && Array.isArray(value)) {
+        serialized[key] = value.map((item) => toDtoInstance(item, dto));
+      }
+    }
+
+    return serialized;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map((item) => toDtoInstance(item, dto));
+  }
+
+  return toDtoInstance(data, dto);
 }
