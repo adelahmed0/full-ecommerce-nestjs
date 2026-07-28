@@ -3,12 +3,15 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  Type,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
 import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator';
+import { SERIALIZE_KEY } from '../decorators/serialize.decorator';
 import { ApiMessage } from '../enums/api-message.enum';
+import { serializeToDto } from '../utils/serialize';
 
 export interface SuccessResponseBody<T> {
   statusCode: number;
@@ -48,12 +51,17 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
       FALLBACK_MESSAGES[request.method] ??
       ApiMessage.SUCCESS;
 
+    const dto = this.reflector.getAllAndOverride<Type | undefined>(
+      SERIALIZE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
     return next.handle().pipe(
       map((data) => ({
         // Read after the handler ran so @HttpCode and the method default apply.
         statusCode: response.statusCode,
         message,
-        data,
+        data: (dto ? serializeToDto(data, dto) : data) as T,
       })),
     );
   }
