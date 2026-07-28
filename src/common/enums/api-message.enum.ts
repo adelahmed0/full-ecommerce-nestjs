@@ -7,6 +7,7 @@ export enum ApiMessage {
   DELETED = 'Deleted successfully',
 
   USER_ALREADY_EXISTS = 'User already exists',
+  USER_NOT_FOUND = 'User not found',
   USER_CREATED = 'User created successfully',
   USERS_FETCHED = 'Users fetched successfully',
   USER_FETCHED = 'User fetched successfully',
