@@ -27,8 +27,8 @@ export class User {
   @Prop({
     required: true,
     type: String,
-    minlength: [3, 'Password must be at least 3 characters long'],
-    maxlength: [20, 'Password must be at most 20 characters long'],
+    // Plain-password length is validated in CreateUserDto.
+    // Hashed values (bcrypt) are longer than 20 characters.
     select: false,
   })
   password: string;
