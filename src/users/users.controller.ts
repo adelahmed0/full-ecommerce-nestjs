@@ -16,6 +16,8 @@ import { ApiMessage } from '../common/enums/api-message.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { UserRole } from './enums/user.enum';
 
 @Controller('users')
@@ -26,8 +28,11 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @ResponseMessage(ApiMessage.USER_CREATED)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @CurrentUser() payload: JwtPayload,
+  ) {
+    return this.usersService.create(createUserDto, payload);
   }
 
   @Get()

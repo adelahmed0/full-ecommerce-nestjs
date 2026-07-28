@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
-import { Model } from 'mongoose';
+
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
-  create(createUserDto: CreateUserDto) {
+
+  create(createUserDto: CreateUserDto, payload: JwtPayload) {
+    console.log(payload);
     return this.userModel.create(createUserDto);
   }
 
@@ -27,3 +31,4 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 }
+
