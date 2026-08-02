@@ -11,6 +11,9 @@ export enum ApiMessage {
   USER_CREATED = 'User created successfully',
   USERS_FETCHED = 'Users fetched successfully',
   USER_FETCHED = 'User fetched successfully',
+  USER_PROFILE_FETCHED = 'Profile fetched successfully',
+  USER_PROFILE_UPDATED = 'Profile updated successfully',
+  USER_PROFILE_DELETED = 'Profile deleted successfully',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 }
