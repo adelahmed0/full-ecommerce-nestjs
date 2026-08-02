@@ -1,0 +1,44 @@
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/enums/user.enum';
+import { SignUpDto } from './dto/sign-up.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async signUp(signUpDto: SignUpDto) {
+    const user = await this.usersService.create({
+      ...signUpDto,
+      role: UserRole.USER,
+    });
+
+    const payload: JwtPayload = {
+      id: String(user.id),
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return { user: user.toObject(), accessToken };
+  }
+
+  getProfile(id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  updateProfile(id: string, updateProfileDto: UpdateProfileDto) {
+    return this.usersService.update(id, updateProfileDto);
+  }
+
+  deleteProfile(id: string) {
+    return this.usersService.remove(id);
+  }
+}
