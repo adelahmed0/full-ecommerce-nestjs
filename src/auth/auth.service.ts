@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/enums/user.enum';
+import { UserDocument } from '../users/schemas/user.schema';
+import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -19,15 +22,32 @@ export class AuthService {
       role: UserRole.USER,
     });
 
-    const payload: JwtPayload = {
-      id: String(user.id),
-      email: user.email,
-      role: user.role,
-    };
+    return this.buildAuthResponse(user);
+  }
 
-    const accessToken = await this.jwtService.signAsync(payload);
+  async signIn(signInDto: SignInDto) {
+    const user = await this.usersService.findByEmailWithPassword(
+      signInDto.email,
+    );
 
-    return { user: user.toObject(), accessToken };
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      signInDto.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.active) {
+      throw new UnauthorizedException('Account is inactive');
+    }
+
+    return this.buildAuthResponse(user);
   }
 
   getProfile(id: string) {
@@ -40,5 +60,20 @@ export class AuthService {
 
   deleteProfile(id: string) {
     return this.usersService.remove(id);
+  }
+
+  private async buildAuthResponse(user: UserDocument) {
+    const payload: JwtPayload = {
+      id: String(user.id),
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return {
+      user: user.toObject(),
+      accessToken,
+    };
   }
 }
