@@ -14,6 +14,7 @@ import { ApiMessage } from '../common/enums/api-message.enum';
 import { AuthGuard } from './guards/auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -23,8 +24,8 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_FETCHED)
-  getProfile(@CurrentUser('id') id: string) {
-    return this.usersService.findOne(id);
+  getProfile(@CurrentUser() user: JwtPayload) {
+    return this.usersService.findOne(user.id);
   }
 
   @Patch('profile')
@@ -32,17 +33,17 @@ export class AuthController {
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_UPDATED)
   updateProfile(
-    @CurrentUser('id') id: string,
+    @CurrentUser() user: JwtPayload,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    return this.usersService.update(id, updateProfileDto);
+    return this.usersService.update(user.id, updateProfileDto);
   }
 
   @Delete('profile')
   @UseGuards(AuthGuard)
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_DELETED)
-  deleteProfile(@CurrentUser('id') id: string) {
-    return this.usersService.remove(id);
+  deleteProfile(@CurrentUser() user: JwtPayload) {
+    return this.usersService.remove(user.id);
   }
 }
