@@ -89,6 +89,23 @@ export class UsersService {
     return this.userModel.findById(id).select('+password').exec();
   }
 
+  findByEmail(email: string) {
+    return this.userModel.findOne({ email }).exec();
+  }
+
+  async setVerificationCode(userId: string, code: string, expiresAt: Date) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          verificationCode: code,
+          verificationCodeExpiresAt: expiresAt,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     if (updateUserDto.email) {
       const emailTaken = await this.userModel.exists({
