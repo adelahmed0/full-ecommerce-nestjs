@@ -20,6 +20,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from './enums/user.enum';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserListItemDto } from './dto/user-list-item.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
 
 @Controller('users')
@@ -38,7 +39,7 @@ export class UsersController {
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
-  @Serialize(UserResponseDto)
+  @Serialize(UserListItemDto)
   @ResponseMessage(ApiMessage.USERS_FETCHED)
   findAll(@Query() query: FindUsersQueryDto) {
     return this.usersService.findAll(query);
@@ -65,7 +66,7 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN, UserRole.USER])
-  @Serialize(UserResponseDto)
+  @Serialize(UserListItemDto)
   @ResponseMessage(ApiMessage.USER_DELETED)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

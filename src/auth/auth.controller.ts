@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { UserResponseDto } from '../users/dto/user-response.dto';
+import { UserProfileDto } from '../users/dto/user-profile.dto';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { Serialize } from '../common/decorators/serialize.decorator';
 import { ApiMessage } from '../common/enums/api-message.enum';
@@ -40,7 +40,7 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(AuthGuard)
-  @Serialize(UserResponseDto)
+  @Serialize(UserProfileDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_FETCHED)
   getProfile(@CurrentUser() user: JwtPayload) {
     return this.authService.getProfile(user.id);
@@ -48,7 +48,7 @@ export class AuthController {
 
   @Patch('profile')
   @UseGuards(AuthGuard)
-  @Serialize(UserResponseDto)
+  @Serialize(UserProfileDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_UPDATED)
   updateProfile(
     @CurrentUser() user: JwtPayload,
@@ -59,7 +59,7 @@ export class AuthController {
 
   @Delete('profile')
   @UseGuards(AuthGuard)
-  @Serialize(UserResponseDto)
+  @Serialize(UserProfileDto)
   @ResponseMessage(ApiMessage.USER_PROFILE_DELETED)
   deleteProfile(@CurrentUser() user: JwtPayload) {
     return this.authService.deleteProfile(user.id);
