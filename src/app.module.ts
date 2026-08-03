@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 
 @Module({
@@ -24,6 +25,7 @@ import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
         expiresIn: process.env.JWT_EXPIRES_IN as JwtSignOptions['expiresIn'],
       },
     }),
+    MailModule,
     UsersModule,
     AuthModule,
   ],
