@@ -1,14 +1,8 @@
-import { Expose, Transform } from 'class-transformer';
-import { UserRole, UserGender, UserActive } from '../enums/user.enum';
+import { Expose } from 'class-transformer';
+import { UserActive, UserGender, UserRole } from '../enums/user.enum';
+import { BaseUserIdDto } from './base-user-id.dto';
 
-export class UserResponseDto {
-  @Expose()
-  @Transform(
-    ({ obj }: { obj: { _id?: { toString(): string }; id?: string } }) =>
-      obj.id ?? obj._id?.toString(),
-  )
-  id: string;
-
+export class UserResponseDto extends BaseUserIdDto {
   @Expose()
   name: string;
 
