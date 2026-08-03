@@ -101,7 +101,7 @@ export class UsersService {
           verificationCode: code,
           verificationCodeExpiresAt: expiresAt,
         },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .exec();
   }
@@ -126,7 +126,7 @@ export class UsersService {
     }
 
     const user = await this.userModel
-      .findByIdAndUpdate(id, payload, { new: true })
+      .findByIdAndUpdate(id, payload, { returnDocument: 'after' })
       .exec();
 
     if (!user) {
