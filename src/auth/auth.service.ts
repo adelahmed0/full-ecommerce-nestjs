@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,6 +8,7 @@ import { ApiMessage } from '../common/enums/api-message.enum';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomInt } from 'crypto';
+import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/enums/user.enum';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -21,11 +21,10 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
@@ -78,8 +77,7 @@ export class AuthService {
       expiresAt,
     );
 
-    // Temporary until email service is connected.
-    this.logger.log(`Password reset code for ${user.email}: ${code}`);
+    await this.mailService.sendPasswordResetCode(user.email, code, user.name);
 
     return null;
   }
