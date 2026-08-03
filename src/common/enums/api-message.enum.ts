@@ -8,6 +8,7 @@ export enum ApiMessage {
 
   USER_ALREADY_EXISTS = 'User already exists',
   USER_NOT_FOUND = 'User not found',
+  EMAIL_NOT_FOUND = 'Email not found',
   SIGNED_UP = 'Signed up successfully',
   SIGNED_IN = 'Signed in successfully',
   USER_CREATED = 'User created successfully',
@@ -17,6 +18,7 @@ export enum ApiMessage {
   USER_PROFILE_UPDATED = 'Profile updated successfully',
   USER_PROFILE_DELETED = 'Profile deleted successfully',
   PASSWORD_CHANGED = 'Password changed successfully',
+  FORGOT_PASSWORD_EMAIL_SENT = 'Reset code has been generated',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 }

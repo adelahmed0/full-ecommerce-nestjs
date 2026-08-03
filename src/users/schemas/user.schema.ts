@@ -90,6 +90,14 @@ export class User {
   verificationCode?: string | null;
 
   @Prop({
+    type: Date,
+    required: false,
+    default: null,
+    select: false,
+  })
+  verificationCodeExpiresAt?: Date | null;
+
+  @Prop({
     type: String,
     required: false,
     enum: [...Object.values(UserGender), null],
