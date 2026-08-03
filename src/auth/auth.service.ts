@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -18,6 +20,9 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+
+const RESET_CODE_COOLDOWN_MS = 60 * 1000;
+const RESET_CODE_EXPIRES_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
@@ -62,14 +67,32 @@ export class AuthService {
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    const user = await this.usersService.findByEmail(forgotPasswordDto.email);
+    const user = await this.usersService.findByEmailForPasswordReset(
+      forgotPasswordDto.email,
+    );
 
     if (!user || !user.active) {
       throw new NotFoundException(ApiMessage.EMAIL_NOT_FOUND);
     }
 
+    if (user.verificationCodeSentAt) {
+      const elapsed =
+        Date.now() - new Date(user.verificationCodeSentAt).getTime();
+
+      if (elapsed < RESET_CODE_COOLDOWN_MS) {
+        const waitSeconds = Math.ceil(
+          (RESET_CODE_COOLDOWN_MS - elapsed) / 1000,
+        );
+
+        throw new HttpException(
+          `Please wait ${waitSeconds} seconds before requesting another code`,
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+    }
+
     const code = randomInt(100000, 1000000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + RESET_CODE_EXPIRES_MS);
 
     await this.usersService.setVerificationCode(
       String(user.id),
