@@ -93,6 +93,13 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
+  findByEmailForPasswordReset(email: string) {
+    return this.userModel
+      .findOne({ email })
+      .select('+verificationCodeSentAt')
+      .exec();
+  }
+
   async setVerificationCode(userId: string, code: string, expiresAt: Date) {
     return this.userModel
       .findByIdAndUpdate(
@@ -100,6 +107,7 @@ export class UsersService {
         {
           verificationCode: code,
           verificationCodeExpiresAt: expiresAt,
+          verificationCodeSentAt: new Date(),
         },
         { returnDocument: 'after' },
       )
