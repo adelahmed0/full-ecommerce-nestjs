@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -36,6 +37,16 @@ export class AuthController {
   @ResponseMessage(ApiMessage.SIGNED_IN)
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
+  }
+
+  @Patch('change-password')
+  @UseGuards(AuthGuard)
+  @ResponseMessage(ApiMessage.PASSWORD_CHANGED)
+  changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.id, changePasswordDto);
   }
 
   @Get('profile')
