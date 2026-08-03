@@ -18,7 +18,7 @@ export enum ApiMessage {
   USER_PROFILE_UPDATED = 'Profile updated successfully',
   USER_PROFILE_DELETED = 'Profile deleted successfully',
   PASSWORD_CHANGED = 'Password changed successfully',
-  FORGOT_PASSWORD_EMAIL_SENT = 'Reset code has been generated',
+  FORGOT_PASSWORD_EMAIL_SENT = 'Reset code has been sent to your email',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 }
