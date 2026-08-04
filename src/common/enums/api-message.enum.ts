@@ -23,6 +23,7 @@ export enum ApiMessage {
   RESET_CODE_VERIFIED = 'Reset code verified successfully',
   INVALID_RESET_CODE = 'Invalid reset code',
   RESET_CODE_EXPIRED = 'Reset code has expired',
+  PASSWORD_RESET = 'Password reset successfully',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 }
