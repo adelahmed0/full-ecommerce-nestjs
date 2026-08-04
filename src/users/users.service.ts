@@ -96,7 +96,9 @@ export class UsersService {
   findByEmailForPasswordReset(email: string) {
     return this.userModel
       .findOne({ email })
-      .select('+verificationCodeSentAt')
+      .select(
+        '+verificationCode +verificationCodeExpiresAt +verificationCodeSentAt',
+      )
       .exec();
   }
 
