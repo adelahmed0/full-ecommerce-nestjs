@@ -20,6 +20,9 @@ export enum ApiMessage {
   PASSWORD_CHANGED = 'Password changed successfully',
   FORGOT_PASSWORD_EMAIL_SENT = 'Reset code has been sent to your email',
   RESET_CODE_COOLDOWN = 'Please wait before requesting another code',
+  RESET_CODE_VERIFIED = 'Reset code verified successfully',
+  INVALID_RESET_CODE = 'Invalid reset code',
+  RESET_CODE_EXPIRED = 'Reset code has expired',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 }
