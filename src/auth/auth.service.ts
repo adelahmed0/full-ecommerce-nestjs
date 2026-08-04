@@ -15,12 +15,10 @@ import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/enums/user.enum';
 import { UserDocument } from '../users/schemas/user.schema';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
@@ -141,50 +139,6 @@ export class AuthService {
     );
 
     return null;
-  }
-
-  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
-    const { currentPassword, newPassword } = changePasswordDto;
-
-    if (currentPassword === newPassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
-      );
-    }
-
-    const user = await this.usersService.findByIdWithPassword(userId);
-
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new BadRequestException({
-        message: 'Current password is incorrect',
-        errors: { currentPassword: 'Current password is incorrect' },
-      });
-    }
-
-    await this.usersService.update(userId, { password: newPassword });
-
-    return null;
-  }
-
-  getProfile(id: string) {
-    return this.usersService.findOne(id);
-  }
-
-  updateProfile(id: string, updateProfileDto: UpdateProfileDto) {
-    return this.usersService.update(id, updateProfileDto);
-  }
-
-  deleteProfile(id: string) {
-    return this.usersService.remove(id);
   }
 
   private async assertValidResetCode(email: string, code: string) {
