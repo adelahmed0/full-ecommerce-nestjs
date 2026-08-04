@@ -116,6 +116,21 @@ export class UsersService {
       .exec();
   }
 
+  async resetPasswordWithCode(userId: string, hashedPassword: string) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          password: hashedPassword,
+          verificationCode: null,
+          verificationCodeExpiresAt: null,
+          verificationCodeSentAt: null,
+        },
+        { returnDocument: 'after' },
+      )
+      .exec();
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     if (updateUserDto.email) {
       const emailTaken = await this.userModel.exists({
