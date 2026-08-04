@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { ProfileModule } from './profile/profile.module';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 
 @Module({
@@ -28,6 +29,7 @@ import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
     MailModule,
     UsersModule,
     AuthModule,
+    ProfileModule,
   ],
   controllers: [],
   providers: [],
