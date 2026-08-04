@@ -17,6 +17,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -51,6 +52,12 @@ export class AuthController {
   @ResponseMessage(ApiMessage.RESET_CODE_VERIFIED)
   verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto) {
     return this.authService.verifyResetCode(verifyResetCodeDto);
+  }
+
+  @Post('reset-password')
+  @ResponseMessage(ApiMessage.PASSWORD_RESET)
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @Patch('change-password')

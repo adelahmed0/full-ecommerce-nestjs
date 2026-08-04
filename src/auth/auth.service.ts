@@ -17,6 +17,7 @@ import { UserRole } from '../users/enums/user.enum';
 import { UserDocument } from '../users/schemas/user.schema';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -118,25 +119,26 @@ export class AuthService {
   }
 
   async verifyResetCode(verifyResetCodeDto: VerifyResetCodeDto) {
-    const user = await this.usersService.findByEmailForPasswordReset(
+    await this.assertValidResetCode(
       verifyResetCodeDto.email,
+      verifyResetCodeDto.code,
     );
 
-    if (!user || !user.active) {
-      throw new NotFoundException(ApiMessage.EMAIL_NOT_FOUND);
-    }
+    return null;
+  }
 
-    if (!user.verificationCode || !user.verificationCodeExpiresAt) {
-      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
-    }
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const user = await this.assertValidResetCode(
+      resetPasswordDto.email,
+      resetPasswordDto.code,
+    );
 
-    if (new Date(user.verificationCodeExpiresAt).getTime() < Date.now()) {
-      throw new BadRequestException(ApiMessage.RESET_CODE_EXPIRED);
-    }
+    const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
 
-    if (user.verificationCode !== verifyResetCodeDto.code) {
-      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
-    }
+    await this.usersService.resetPasswordWithCode(
+      String(user.id),
+      hashedPassword,
+    );
 
     return null;
   }
@@ -183,6 +185,28 @@ export class AuthService {
 
   deleteProfile(id: string) {
     return this.usersService.remove(id);
+  }
+
+  private async assertValidResetCode(email: string, code: string) {
+    const user = await this.usersService.findByEmailForPasswordReset(email);
+
+    if (!user || !user.active) {
+      throw new NotFoundException(ApiMessage.EMAIL_NOT_FOUND);
+    }
+
+    if (!user.verificationCode || !user.verificationCodeExpiresAt) {
+      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
+    }
+
+    if (new Date(user.verificationCodeExpiresAt).getTime() < Date.now()) {
+      throw new BadRequestException(ApiMessage.RESET_CODE_EXPIRED);
+    }
+
+    if (user.verificationCode !== code) {
+      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
+    }
+
+    return user;
   }
 
   private async buildAuthResponse(user: UserDocument) {
