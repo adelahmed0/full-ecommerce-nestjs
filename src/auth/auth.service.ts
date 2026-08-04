@@ -20,6 +20,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 const RESET_CODE_COOLDOWN_MS = 60 * 1000;
@@ -112,6 +113,30 @@ export class AuthService {
           error instanceof Error ? error.stack : error,
         );
       });
+
+    return null;
+  }
+
+  async verifyResetCode(verifyResetCodeDto: VerifyResetCodeDto) {
+    const user = await this.usersService.findByEmailForPasswordReset(
+      verifyResetCodeDto.email,
+    );
+
+    if (!user || !user.active) {
+      throw new NotFoundException(ApiMessage.EMAIL_NOT_FOUND);
+    }
+
+    if (!user.verificationCode || !user.verificationCodeExpiresAt) {
+      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
+    }
+
+    if (new Date(user.verificationCodeExpiresAt).getTime() < Date.now()) {
+      throw new BadRequestException(ApiMessage.RESET_CODE_EXPIRED);
+    }
+
+    if (user.verificationCode !== verifyResetCodeDto.code) {
+      throw new BadRequestException(ApiMessage.INVALID_RESET_CODE);
+    }
 
     return null;
   }

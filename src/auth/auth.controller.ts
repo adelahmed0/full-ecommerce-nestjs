@@ -20,6 +20,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth')
@@ -44,6 +45,12 @@ export class AuthController {
   @ResponseMessage(ApiMessage.FORGOT_PASSWORD_EMAIL_SENT)
   forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('verify-reset-code')
+  @ResponseMessage(ApiMessage.RESET_CODE_VERIFIED)
+  verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto) {
+    return this.authService.verifyResetCode(verifyResetCodeDto);
   }
 
   @Patch('change-password')
