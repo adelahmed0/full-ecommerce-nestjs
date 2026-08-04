@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -26,6 +27,8 @@ const RESET_CODE_EXPIRES_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -100,7 +103,15 @@ export class AuthService {
       expiresAt,
     );
 
-    await this.mailService.sendPasswordResetCode(user.email, code, user.name);
+    // Send email in the background so the API responds quickly.
+    void this.mailService
+      .sendPasswordResetCode(user.email, code, user.name)
+      .catch((error: unknown) => {
+        this.logger.error(
+          `Background password reset email failed for ${user.email}`,
+          error instanceof Error ? error.stack : error,
+        );
+      });
 
     return null;
   }
