@@ -6,7 +6,9 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // JSON body parser off — request bodies use multipart/form-data.
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
+
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(
