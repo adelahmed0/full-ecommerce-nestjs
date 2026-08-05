@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util';
 import { UserRole, UserActive, UserGender } from '../enums/user.enum';
 
 export type UserDocument = HydratedDocument<User>;
@@ -116,30 +117,6 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-function sanitizeUser(
-  _doc: unknown,
-  ret: {
-    _id?: unknown;
-    id?: string;
-    password?: string;
-    verificationCode?: string | null;
-  },
-) {
-  ret.id = String(ret._id);
-  delete ret._id;
-  delete ret.password;
-  delete ret.verificationCode;
-  return ret;
-}
-
-UserSchema.set('toJSON', {
-  virtuals: true,
-  versionKey: false,
-  transform: sanitizeUser,
-});
-
-UserSchema.set('toObject', {
-  virtuals: true,
-  versionKey: false,
-  transform: sanitizeUser,
+applyDocumentJsonTransform(UserSchema, {
+  omitFields: ['password', 'verificationCode'],
 });

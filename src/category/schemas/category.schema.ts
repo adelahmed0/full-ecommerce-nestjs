@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util';
 
 export type CategoryDocument = HydratedDocument<Category>;
 
@@ -24,26 +25,4 @@ export class Category {
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
-function sanitizeCategory(
-  _doc: unknown,
-  ret: {
-    _id?: unknown;
-    id?: string;
-  },
-) {
-  ret.id = String(ret._id);
-  delete ret._id;
-  return ret;
-}
-
-CategorySchema.set('toJSON', {
-  virtuals: true,
-  versionKey: false,
-  transform: sanitizeCategory,
-});
-
-CategorySchema.set('toObject', {
-  virtuals: true,
-  versionKey: false,
-  transform: sanitizeCategory,
-});
+applyDocumentJsonTransform(CategorySchema);
