@@ -14,6 +14,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { UserGender, UserRole } from '../enums/user.enum';
 
 export class CreateUserDto {
@@ -44,6 +45,7 @@ export class CreateUserDto {
   avatar?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt({ message: 'Age must be an integer' })
   @Min(1, { message: 'Age must be at least 1' })
   age?: number;
@@ -60,6 +62,24 @@ export class CreateUserDto {
   address?: string;
 
   @IsOptional()
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', '1'].includes(normalized)) {
+        return true;
+      }
+      if (['false', '0'].includes(normalized)) {
+        return false;
+      }
+    }
+    return value;
+  })
   @IsBoolean({ message: 'Active must be a boolean' })
   active?: boolean;
 
