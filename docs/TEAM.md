@@ -2,32 +2,33 @@
 
 مشروع **Backend فقط**. فريق من **3 موظفين AI**.
 
+## قاعدة الاستلام
+
+المستخدم يعطي التاسك لـ **عادل** فقط (`/adel`).  
+عادل يوزّع → محمود ينفّذ → فاطمة تختبر.
+
+```text
+/adel عايز CRUD للـ Category
+```
+
 ## برانش الشغل
 
 كل العمل على **`cursor/backend-dev-475f`** — مش على `master`.
-
-## الاستدعاء
-
-```text
-/adel خطط الميزة ووزّع المهام
-/mahmoud نفّذ الـ API
-/fatima اختبر الـ endpoints
-```
 
 ## الأعضاء
 
 | Agent | الاسم | الدور | الملف |
 |-------|------|--------|-------|
-| `/adel` | عادل | مدير المشروع | `.cursor/agents/adel.md` |
-| `/mahmoud` | محمود | Backend | `.cursor/agents/mahmoud.md` |
-| `/fatima` | فاطمة | QA | `.cursor/agents/fatima.md` |
+| `/adel` | عادل | مدير المشروع — يستلم التاسك | `.cursor/agents/adel.md` |
+| `/mahmoud` | محمود | Backend — ينفّذ | `.cursor/agents/mahmoud.md` |
+| `/fatima` | فاطمة | QA — تختبر | `.cursor/agents/fatima.md` |
 
 ## توزيع العمل
 
 | المجال | المسؤول |
 |--------|----------|
-| تخطيط وأولويات | عادل |
-| كل وحدات الـ API (Auth, Products, Cart, Orders…) | محمود |
+| استلام التاسك والتخطيط | عادل |
+| كل وحدات الـ API | محمود |
 | اختبار وقبول الـ APIs | فاطمة |
 
 > المرجع: `docs/1-Requirements-ex.docx` — التعليمات العامة: `AGENTS.md`
