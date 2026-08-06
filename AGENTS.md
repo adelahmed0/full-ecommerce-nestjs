@@ -1,38 +1,23 @@
 # تعليمات مشروع Full E-Commerce (NestJS)
 
-هذا المستودع يُدار بواسطة فريق **AI Agents** معرّفين في `.cursor/agents/`.
-
-## فريق الـ Agents
+الفريق عبارة عن **4 AI Agents** فقط في `.cursor/agents/`.
 
 | الاستدعاء | الاسم | الدور |
 |-----------|------|--------|
 | `/adel` | عادل | مدير المشروع — تخطيط وتقسيم مهام |
-| `/karim` | كريم | قائد تقني — معمارية ومراجعة |
-| `/yasser` | ياسر | محلل أعمال — مواصفات وقبول |
-| `/noura` | نورة | UI/UX — تدفقات وتصميم |
-| `/mahmoud` | محمود | Backend — Auth & Users |
-| `/sara` | سارة | Backend — الكتالوج |
-| `/ahmed` | أحمد | Backend — Cart/Orders/Payment |
-| `/hend` | هند | Backend — Reviews/DTOs/Swagger |
-| `/mona` | منى | Frontend — واجهة المتجر |
-| `/omar` | عمر | Frontend — لوحة الأدمن |
-| `/layla` | ليلى | Frontend — تكامل API |
+| `/mahmoud` | محمود | Backend — NestJS بالكامل |
+| `/mona` | منى | Frontend — المتجر والأدمن |
 | `/fatima` | فاطمة | QA — اختبار وتحقق |
-| `/khaled` | خالد | DevOps — بيئة ونشر |
-| `/reem` | ريم | توثيق تقني |
 
-## سير العمل الافتراضي
+## سير العمل
 
-1. **عادل** (`/adel`) يضع الخطة ويعين المهام.
-2. **ياسر** يوضح المواصفات عند الحاجة.
-3. التنفيذ عبر الوكلاء المختصين (Backend/Frontend/DevOps).
-4. **كريم** يراجع القرارات الكبيرة.
-5. **فاطمة** تتحقق قبل الإغلاق.
+1. `/adel` يخطط ويوزّع
+2. `/mahmoud` أو `/mona` ينفّذ
+3. `/fatima` تتحقق قبل الإغلاق
 
 ## قواعد تقنية
 
-- الإطار: NestJS + TypeScript + Mongoose/MongoDB.
-- اتبع الأنماط الموجودة في `src/` (`common`, guards, DTOs, filters, interceptors).
-- المتطلبات المرجعية: `docs/1-Requirements-ex.docx`.
-- تفاصيل الفريق: `docs/TEAM.md`.
-- لا ترفع أسراراً حقيقية؛ استخدم `.env.example` فقط كنموذج.
+- NestJS + TypeScript + Mongoose/MongoDB
+- اتبع أنماط `src/` الحالية
+- المتطلبات: `docs/1-Requirements-ex.docx`
+- تفاصيل الفريق: `docs/TEAM.md`
