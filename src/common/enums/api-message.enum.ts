@@ -21,4 +21,12 @@ export enum ApiMessage {
   CATEGORY_FETCHED = 'Category fetched successfully',
   CATEGORY_UPDATED = 'Category updated successfully',
   CATEGORY_DELETED = 'Category deleted successfully',
+
+  SUB_CATEGORY_ALREADY_EXISTS = 'Sub category already exists',
+  SUB_CATEGORY_NOT_FOUND = 'Sub category not found',
+  SUB_CATEGORY_CREATED = 'Sub category created successfully',
+  SUB_CATEGORIES_FETCHED = 'Sub categories fetched successfully',
+  SUB_CATEGORY_FETCHED = 'Sub category fetched successfully',
+  SUB_CATEGORY_UPDATED = 'Sub category updated successfully',
+  SUB_CATEGORY_DELETED = 'Sub category deleted successfully',
 }
