@@ -123,7 +123,9 @@ export class SubCategoriesService {
   }
 
   async remove(id: string) {
-    const subCategory = await this.subCategoryModel.findByIdAndDelete(id).exec();
+    const subCategory = await this.subCategoryModel
+      .findByIdAndDelete(id)
+      .exec();
     if (!subCategory) {
       throw new NotFoundException(ApiMessage.SUB_CATEGORY_NOT_FOUND);
     }

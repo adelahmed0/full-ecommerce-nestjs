@@ -43,9 +43,11 @@ function sanitizeSubCategory(
       _id?: { toString(): string };
       id?: string;
     };
-    ret.category = category.id ?? category._id?.toString() ?? ret.category;
-  } else if (ret.category != null) {
-    ret.category = String(ret.category);
+    if (category.id) {
+      ret.category = category.id;
+    } else if (category._id) {
+      ret.category = category._id.toString();
+    }
   }
 
   return ret;
