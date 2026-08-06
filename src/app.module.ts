@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
+import { CategoriesModule } from './categories/categories.module';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 
 @Module({
@@ -24,6 +25,7 @@ import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
       },
     }),
     UsersModule,
+    CategoriesModule,
   ],
   controllers: [],
   providers: [],

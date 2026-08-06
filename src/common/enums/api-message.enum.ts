@@ -13,4 +13,12 @@ export enum ApiMessage {
   USER_FETCHED = 'User fetched successfully',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
+
+  CATEGORY_ALREADY_EXISTS = 'Category already exists',
+  CATEGORY_NOT_FOUND = 'Category not found',
+  CATEGORY_CREATED = 'Category created successfully',
+  CATEGORIES_FETCHED = 'Categories fetched successfully',
+  CATEGORY_FETCHED = 'Category fetched successfully',
+  CATEGORY_UPDATED = 'Category updated successfully',
+  CATEGORY_DELETED = 'Category deleted successfully',
 }
