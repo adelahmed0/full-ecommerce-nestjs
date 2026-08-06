@@ -1,14 +1,13 @@
-# فريق AI Agents — Full E-Commerce
+# فريق AI Agents — Backend API
 
-فريق صغير من **4 موظفين AI** فقط داخل Cursor.
+مشروع **Backend فقط**. فريق من **3 موظفين AI**.
 
 ## الاستدعاء
 
 ```text
 /adel خطط الميزة ووزّع المهام
 /mahmoud نفّذ الـ API
-/mona ابنِ الواجهة
-/fatima اختبر الشغل
+/fatima اختبر الـ endpoints
 ```
 
 ## الأعضاء
@@ -17,7 +16,6 @@
 |-------|------|--------|-------|
 | `/adel` | عادل | مدير المشروع | `.cursor/agents/adel.md` |
 | `/mahmoud` | محمود | Backend | `.cursor/agents/mahmoud.md` |
-| `/mona` | منى | Frontend | `.cursor/agents/mona.md` |
 | `/fatima` | فاطمة | QA | `.cursor/agents/fatima.md` |
 
 ## توزيع العمل
@@ -25,8 +23,7 @@
 | المجال | المسؤول |
 |--------|----------|
 | تخطيط وأولويات | عادل |
-| Auth / Users / Products / Cart / Orders / باقي الـ API | محمود |
-| واجهة المتجر ولوحة الأدمن | منى |
-| اختبار وقبول | فاطمة |
+| كل وحدات الـ API (Auth, Products, Cart, Orders…) | محمود |
+| اختبار وقبول الـ APIs | فاطمة |
 
 > المرجع: `docs/1-Requirements-ex.docx` — التعليمات العامة: `AGENTS.md`
