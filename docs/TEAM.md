@@ -12,8 +12,9 @@
 | Agent | الاسم | الدور | ماذا يفعل |
 |-------|------|--------|-----------|
 | `/adel` | عادل | مدير المشروع | يستلم التاسك، يشرحه، يحدد شغل كل واحد، يتابع، يبعت تقرير |
+| `/noura` | نورة | UI/UX | تصمم التدفقات والشاشات وتسلم مواصفات لمنى |
 | `/mahmoud` | محمود | Backend (NestJS) | ينفّذ الـ APIs بعد توزيع عادل |
-| `/mona` | منى | Frontend (React) | تنفّذ واجهات React بعد توزيع عادل |
+| `/mona` | منى | Frontend (React) | تنفّذ واجهات React بعد توزيع عادل ومواصفات نورة |
 | `/fatima` | فاطمة | QA / Postman | تختبر، تحدّث `postman/`، تقرير قبول/رفض |
 
 ## عادل يحدد التاسكات هكذا
@@ -22,13 +23,14 @@
 التاسك: ...
 شرح التاسك: ...
 البرانش: cursor/...-475f (من cursor/backend-dev-475f)
+شغل نورة: ...
 شغل محمود: ...
 شغل منى: ...
 شغل فاطمة: ...
 معايير القبول:
 - ...
 الحالة: بانتظار التنفيذ
-الخطوة الجاية: /mahmoud أو /mona ...
+الخطوة الجاية: /noura أو /mahmoud أو /mona ...
 ```
 
 ثم يبعت التقرير تيليجرام:
@@ -41,6 +43,7 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/adel-report
 | الموظف | الأمر |
 |--------|------|
 | عادل | `--employee adel --type intake` أو `close` |
+| نورة | `--employee noura --type done` أو `progress` |
 | محمود | `--employee mahmoud --type done` أو `progress` |
 | منى | `--employee mona --type done` أو `progress` |
 | فاطمة | `--employee fatima --type qa` |
@@ -48,6 +51,7 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/adel-report
 ## الملفات
 
 - `.cursor/agents/adel.md`
+- `.cursor/agents/noura.md`
 - `.cursor/agents/mahmoud.md`
 - `.cursor/agents/mona.md`
 - `.cursor/agents/fatima.md`

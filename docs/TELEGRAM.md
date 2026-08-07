@@ -53,6 +53,7 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/report.txt
 | الموظف | `--employee` | `--type` الشائع |
 |--------|--------------|------------------|
 | عادل | `adel` | `intake` / `close` |
+| نورة | `noura` | `progress` / `done` |
 | محمود | `mahmoud` | `progress` / `done` |
 | منى | `mona` | `progress` / `done` |
 | فاطمة | `fatima` | `qa` |
