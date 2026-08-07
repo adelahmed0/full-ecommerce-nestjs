@@ -1,17 +1,27 @@
 #!/usr/bin/env node
 /**
- * Poll Telegram for inbound messages/tasks from the group.
+ * Live Telegram task receiver + continuous status updates.
  *
- * Usage:
- *   npm run telegram:poll
+ * npm run telegram:poll
  *
- * Reads TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID from env/.env
- * Saves tasks to telegram-inbox/ and acknowledges in the group.
+ * - Receives tasks from the group
+ * - Sends Adel intake immediately (formatted)
+ * - Keeps sending progress updates until the task is closed
+ * - Commands:
+ *   /status  -> open tasks
+ *   /done    -> close latest task
+ *   /done <id>
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
 const https = require('node:https');
+const { spawnSync } = require('node:child_process');
+
+const INBOX_DIR = path.join(process.cwd(), 'telegram-inbox');
+const OPEN_TASKS_FILE = path.join(INBOX_DIR, 'open-tasks.json');
+const OFFSET_FILE = path.join(INBOX_DIR, '.offset');
+const STATUS_EVERY_MS = Number(process.env.TELEGRAM_STATUS_EVERY_MS || 45000);
 
 function loadDotEnv() {
   const envPath = path.join(process.cwd(), '.env');
@@ -33,38 +43,31 @@ function loadDotEnv() {
   }
 }
 
-function request(method, apiPath, body) {
+function request(apiPath, body) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const payload = body ? JSON.stringify(body) : null;
+  const payload = JSON.stringify(body || {});
   const url = new URL(`https://api.telegram.org/bot${token}${apiPath}`);
-
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
         protocol: url.protocol,
         hostname: url.hostname,
         path: url.pathname + url.search,
-        method,
-        headers: payload
-          ? {
-              'Content-Type': 'application/json',
-              'Content-Length': Buffer.byteLength(payload),
-            }
-          : undefined,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+        },
       },
       (res) => {
         let data = '';
-        res.setEncoding('utf8');
         res.on('data', (chunk) => {
           data += chunk;
         });
         res.on('end', () => {
           try {
             const json = JSON.parse(data);
-            if (!json.ok) {
-              reject(new Error(JSON.stringify(json)));
-              return;
-            }
+            if (!json.ok) return reject(new Error(data));
             resolve(json.result);
           } catch (error) {
             reject(error);
@@ -73,38 +76,107 @@ function request(method, apiPath, body) {
       },
     );
     req.on('error', reject);
-    if (payload) req.write(payload);
+    req.write(payload);
     req.end();
   });
 }
 
 function sendMessage(chatId, text) {
-  return request('POST', '/sendMessage', {
+  return request('/sendMessage', {
     chat_id: chatId,
     text,
     disable_web_page_preview: true,
   });
 }
 
-function writeInbox(text, meta) {
-  const inboxDir = path.join(process.cwd(), 'telegram-inbox');
-  fs.mkdirSync(inboxDir, { recursive: true });
-  const id = `tg-${Date.now()}`;
+function notifyEmployee(employee, type, message) {
+  const file = path.join(INBOX_DIR, `.notify-${Date.now()}.txt`);
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
+  fs.writeFileSync(file, message, 'utf8');
+  const result = spawnSync(
+    process.execPath,
+    [
+      path.join(process.cwd(), 'scripts', 'telegram-notify.cjs'),
+      '--employee',
+      employee,
+      '--type',
+      type,
+      '--file',
+      file,
+    ],
+    { encoding: 'utf8' },
+  );
+  try {
+    fs.unlinkSync(file);
+  } catch {
+    // ignore
+  }
+  if (result.status !== 0) {
+    console.error('[notify]', result.stderr || result.stdout);
+  }
+}
+
+function readOpenTasks() {
+  if (!fs.existsSync(OPEN_TASKS_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(OPEN_TASKS_FILE, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+
+function writeOpenTasks(tasks) {
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
+  fs.writeFileSync(OPEN_TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf8');
+}
+
+function analyzeTask(text) {
+  const lower = text.toLowerCase();
+  const arabic = text;
+  const needsBackend =
+    /api|crud|endpoint|backend|nestjs|mongo|postman|endpoint|ايند ?بوينت|باك/i.test(
+      `${lower} ${arabic}`,
+    );
+  const needsFrontend =
+    /react|frontend|ui|ux|موقع|فرونت|شاشة|واجهة|تصميم/i.test(
+      `${lower} ${arabic}`,
+    );
+  const needsDesign = /ui|ux|تصميم|تجربة|شاشات/i.test(`${lower} ${arabic}`);
+
+  // Default: if unclear, involve backend lead.
+  const mahmoud =
+    needsBackend || (!needsFrontend && !needsDesign)
+      ? 'تحليل وتنفيذ جزء الـ API المطلوب'
+      : 'دعم الـ API لو منى احتاجت';
+  const noura = needsDesign || needsFrontend ? 'تصميم التدفقات والشاشات' : 'غير مطلوب';
+  const mona = needsFrontend || needsDesign ? 'تنفيذ React وربط الموقع' : 'غير مطلوب';
+  const fatima = needsFrontend
+    ? 'اختبار Postman للباك + تجربة الموقع على كل أحجام الشاشات'
+    : 'اختبار Postman للـ endpoints';
+
+  return { mahmoud, noura, mona, fatima, needsBackend, needsFrontend };
+}
+
+function writeInbox(task) {
   const content = [
-    'التاسك: وارد من تيليجرام',
-    `شرح التاسك: ${text}`,
+    `التاسك: ${task.title}`,
+    `شرح التاسك: ${task.text}`,
     'البرانش: cursor/backend-dev-475f',
-    `المرسل: ${meta.from || 'غير معروف'}`,
-    `chatId: ${meta.chatId}`,
-    `updateId: ${meta.updateId}`,
-    `الوقت: ${new Date().toISOString()}`,
-    'الحالة: بانتظار استلام عادل وتوزيع الشغل',
-    'الخطوة الجاية: /adel',
+    `المرسل: ${task.from}`,
+    `chatId: ${task.chatId}`,
+    `taskId: ${task.id}`,
+    `الوقت: ${task.createdAt}`,
+    `شغل نورة: ${task.assignment.noura}`,
+    `شغل محمود: ${task.assignment.mahmoud}`,
+    `شغل منى: ${task.assignment.mona}`,
+    `شغل فاطمة: ${task.assignment.fatima}`,
+    `الحالة: ${task.status}`,
+    `الخطوة الجاية: ${task.nextStep}`,
     '',
   ].join('\n');
-  fs.writeFileSync(path.join(inboxDir, 'latest-task.txt'), content, 'utf8');
-  fs.writeFileSync(path.join(inboxDir, `${id}.txt`), content, 'utf8');
-  return id;
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
+  fs.writeFileSync(path.join(INBOX_DIR, 'latest-task.txt'), content, 'utf8');
+  fs.writeFileSync(path.join(INBOX_DIR, `${task.id}.txt`), content, 'utf8');
 }
 
 function shouldIgnore(text, fromIsBot, chatId) {
@@ -114,8 +186,173 @@ function shouldIgnore(text, fromIsBot, chatId) {
   if (allowed && String(chatId) !== allowed) return true;
   if (text.includes('تحديث مشروع Full E-Commerce')) return true;
   if (text.includes('عادل استلم التاسك من تيليجرام')) return true;
-  if (text.startsWith('👔 عادل')) return true;
+  if (text.includes('تحديث حالة التاسك')) return true;
+  if (text.startsWith('👔') || text.startsWith('🛠️') || text.startsWith('✅'))
+    return true;
+  if (text.startsWith('🎨') || text.startsWith('⚛️') || text.startsWith('📥'))
+    return true;
+  if (text.startsWith('/status') || text.startsWith('/done')) return false;
   return false;
+}
+
+async function sendStatusDigest(chatId, tasks) {
+  if (!tasks.length) {
+    await sendMessage(chatId, '📍 مفيش تاسكات مفتوحة حاليًا.');
+    return;
+  }
+  const lines = ['📍 التاسكات المفتوحة الآن:', ''];
+  for (const task of tasks) {
+    lines.push(`• ${task.id}`);
+    lines.push(`  التاسك: ${task.text.slice(0, 80)}`);
+    lines.push(`  الحالة: ${task.status}`);
+    lines.push(`  التالي: ${task.nextStep}`);
+    lines.push('');
+  }
+  lines.push('اقفل تاسك: /done أو /done <id>');
+  await sendMessage(chatId, lines.join('\n'));
+}
+
+async function closeTask(chatId, taskId) {
+  const tasks = readOpenTasks();
+  if (!tasks.length) {
+    await sendMessage(chatId, 'مفيش تاسك مفتوح للإغلاق.');
+    return;
+  }
+  let target = tasks[0];
+  if (taskId) {
+    target = tasks.find((task) => task.id === taskId);
+    if (!target) {
+      await sendMessage(chatId, `مش لاقي تاسك بالرقم: ${taskId}`);
+      return;
+    }
+  }
+  target.status = 'تم الإغلاق';
+  target.nextStep = 'مغلق';
+  target.closedAt = new Date().toISOString();
+  writeOpenTasks(tasks.filter((task) => task.id !== target.id));
+  notifyEmployee(
+    'adel',
+    'close',
+    [
+      `التاسك: ${target.text}`,
+      `شرح التاسك: تم إغلاق المتابعة من تيليجرام`,
+      `البرانش: cursor/backend-dev-475f`,
+      `taskId: ${target.id}`,
+      'الحالة: مغلق',
+      'الخطوة الجاية: بانتظار تاسك جديد',
+    ].join('\n'),
+  );
+}
+
+async function createAndBroadcastTask({ text, from, chatId, updateId }) {
+  const id = `tg-${Date.now()}`;
+  const assignment = analyzeTask(text);
+  const task = {
+    id,
+    title: 'وارد من تيليجرام',
+    text,
+    from,
+    chatId: String(chatId),
+    updateId,
+    createdAt: new Date().toISOString(),
+    status: 'جاري التوزيع والمتابعة',
+    nextStep: assignment.needsFrontend
+      ? 'نورة/منى/محمود حسب التوزيع'
+      : 'محمود ثم فاطمة',
+    assignment,
+    tick: 0,
+    lastStatusAt: 0,
+  };
+
+  writeInbox(task);
+  const open = readOpenTasks();
+  open.unshift(task);
+  writeOpenTasks(open.slice(0, 20));
+
+  // 1) Immediate plain ack
+  await sendMessage(
+    chatId,
+    [
+      '📋 تم استلام التاسك',
+      `رقم المتابعة: ${id}`,
+      '',
+      'هبدأ أبعت تحديثات مستمرة هنا دلوقتي...',
+    ].join('\n'),
+  );
+
+  // 2) Adel intake (formatted)
+  notifyEmployee(
+    'adel',
+    'intake',
+    [
+      `التاسك: ${text}`,
+      `شرح التاسك: تم استلام التاسك من تيليجرام بواسطة ${from}`,
+      'البرانش: cursor/backend-dev-475f',
+      `شغل نورة: ${assignment.noura}`,
+      `شغل محمود: ${assignment.mahmoud}`,
+      `شغل منى: ${assignment.mona}`,
+      `شغل فاطمة: ${assignment.fatima}`,
+      'معايير القبول:',
+      '- تنفيذ المطلوب',
+      '- قبول فاطمة قبل الإغلاق',
+      'الحالة: تم الاستلام والتوزيع المبدئي',
+      'الخطوة الجاية: بدء التنفيذ وإرسال تحديثات مستمرة',
+    ].join('\n'),
+  );
+
+  // 3) Quick follow-up statuses
+  setTimeout(() => {
+    notifyEmployee(
+      'adel',
+      'progress',
+      [
+        `التاسك: ${text}`,
+        `taskId: ${id}`,
+        'الحالة: جاري متابعة التنفيذ مع الفريق',
+        `شغل محمود الآن: ${assignment.mahmoud}`,
+        `شغل منى الآن: ${assignment.mona}`,
+        `شغل نورة الآن: ${assignment.noura}`,
+        'الخطوة الجاية: تحديث دوري كل دقيقة تقريبًا لحد ما التاسك تتقفل بـ /done',
+      ].join('\n'),
+    );
+  }, 2500);
+
+  if (assignment.needsBackend) {
+    setTimeout(() => {
+      notifyEmployee(
+        'mahmoud',
+        'progress',
+        [
+          `المهمة: ${text}`,
+          `taskId: ${id}`,
+          'ما اتعمل:',
+          '- استلام التوزيع من عادل',
+          '- بدء التحضير للتنفيذ',
+          'الحالة: قيد التنفيذ / التحضير',
+          'الخطوة الجاية: تنفيذ المطلوب ثم تسليم فاطمة',
+        ].join('\n'),
+      );
+    }, 5000);
+  }
+
+  if (assignment.needsFrontend || assignment.noura !== 'غير مطلوب') {
+    setTimeout(() => {
+      notifyEmployee(
+        'noura',
+        'progress',
+        [
+          `المهمة: ${text}`,
+          `taskId: ${id}`,
+          'ما اتعمل:',
+          '- استلام طلب التصميم/التدفق من عادل',
+          'الحالة: جاري تجهيز مواصفات UI/UX',
+          'الخطوة الجاية: تسليم منى للتنفيذ',
+        ].join('\n'),
+      );
+    }, 7000);
+  }
+
+  console.log(`[telegram:poll] live task started: ${id}`);
 }
 
 async function processUpdate(update) {
@@ -126,6 +363,20 @@ async function processUpdate(update) {
   const text = (message.text || message.caption || '').trim();
   const chatId = message.chat?.id;
   const fromIsBot = Boolean(message.from?.is_bot);
+  if (shouldIgnore(text, fromIsBot, chatId) && !text.startsWith('/')) return;
+
+  // Commands
+  if (text === '/status' || text.startsWith('/status@')) {
+    await sendStatusDigest(chatId, readOpenTasks());
+    return;
+  }
+  if (text === '/done' || text.startsWith('/done ') || text.startsWith('/done@')) {
+    const parts = text.split(/\s+/);
+    const id = parts[1] && !parts[1].startsWith('@') ? parts[1] : undefined;
+    await closeTask(chatId, id);
+    return;
+  }
+
   if (shouldIgnore(text, fromIsBot, chatId)) return;
 
   const from = [message.from?.first_name, message.from?.last_name]
@@ -133,23 +384,44 @@ async function processUpdate(update) {
     .join(' ')
     .trim();
 
-  const taskId = writeInbox(text, {
+  await createAndBroadcastTask({
+    text,
     from: from || message.from?.username || 'unknown',
     chatId,
     updateId: update.update_id,
   });
+}
 
-  const ack = [
-    '📋 عادل استلم التاسك من تيليجرام',
-    '',
-    `التاسك: ${text}`,
-    `رقم المتابعة: ${taskId}`,
-    '',
-    'هوزّع الشغل على الفريق وأبلّغكم بالتحديثات هنا.',
-  ].join('\n');
+async function heartbeat() {
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const tasks = readOpenTasks();
+  if (!tasks.length) return;
 
-  await sendMessage(chatId, ack);
-  console.log(`[telegram:poll] task received: ${taskId}`);
+  const now = Date.now();
+  let changed = false;
+  for (const task of tasks) {
+    if (now - Number(task.lastStatusAt || 0) < STATUS_EVERY_MS) continue;
+    task.tick = Number(task.tick || 0) + 1;
+    task.lastStatusAt = now;
+    task.status = `متابعة مستمرة (#${task.tick})`;
+    changed = true;
+
+    notifyEmployee(
+      'adel',
+      'progress',
+      [
+        `التاسك: ${task.text}`,
+        `taskId: ${task.id}`,
+        `الحالة: تحديث دوري رقم ${task.tick} — التاسك لسه مفتوحة وبيتتابع`,
+        `شغل نورة: ${task.assignment.noura}`,
+        `شغل محمود: ${task.assignment.mahmoud}`,
+        `شغل منى: ${task.assignment.mona}`,
+        `شغل فاطمة: ${task.assignment.fatima}`,
+        'الخطوة الجاية: الفريق يكمل التنفيذ؛ للإغلاق ابعت /done',
+      ].join('\n'),
+    );
+  }
+  if (changed) writeOpenTasks(tasks);
 }
 
 async function main() {
@@ -159,33 +431,50 @@ async function main() {
     process.exit(1);
   }
 
-  // Prefer polling locally: clear webhook first.
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
   try {
-    await request('POST', '/deleteWebhook', { drop_pending_updates: false });
-    console.log('[telegram:poll] webhook cleared; polling started');
+    await request('/deleteWebhook', { drop_pending_updates: false });
+    console.log('[telegram:poll] webhook cleared; live updates started');
   } catch (error) {
     console.warn('[telegram:poll] deleteWebhook warning:', error.message);
   }
 
+  await sendMessage(
+    process.env.TELEGRAM_CHAT_ID,
+    [
+      '🟢 نظام التحديثات المستمرة شغال',
+      '',
+      'ابعت أي تاسك هنا وهتوصلك تحديثات طول ما التاسك مفتوحة.',
+      'الأوامر:',
+      '/status — عرض التاسكات المفتوحة',
+      '/done — إغلاق آخر تاسك',
+    ].join('\n'),
+  );
+
   let offset = 0;
-  const stateFile = path.join(process.cwd(), 'telegram-inbox', '.offset');
-  if (fs.existsSync(stateFile)) {
-    offset = Number(fs.readFileSync(stateFile, 'utf8').trim()) || 0;
+  if (fs.existsSync(OFFSET_FILE)) {
+    offset = Number(fs.readFileSync(OFFSET_FILE, 'utf8').trim()) || 0;
   }
+
+  setInterval(() => {
+    heartbeat().catch((error) =>
+      console.error('[heartbeat]', error.message || error),
+    );
+  }, 15000);
 
   for (;;) {
     try {
-      const updates = await request('POST', '/getUpdates', {
+      const updates = await request('/getUpdates', {
         timeout: 25,
         offset,
         allowed_updates: ['message', 'edited_message'],
       });
       for (const update of updates || []) {
         offset = Number(update.update_id) + 1;
-        fs.mkdirSync(path.dirname(stateFile), { recursive: true });
-        fs.writeFileSync(stateFile, String(offset), 'utf8');
+        fs.writeFileSync(OFFSET_FILE, String(offset), 'utf8');
         await processUpdate(update);
       }
+      await heartbeat();
     } catch (error) {
       console.error('[telegram:poll] error:', error.message || error);
       await new Promise((resolve) => setTimeout(resolve, 3000));

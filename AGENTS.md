@@ -61,8 +61,8 @@
 
 ### تيليجرام (اتجاهين)
 
-- **منك للمشروع:** ابعت تاسك في جروب Nest js → البوت يستقبله → يتخزن في `telegram-inbox/` → عادل يوزّع  
-  تشغيل الاستقبال: `npm run telegram:poll` أو Webhook على `/api/telegram/webhook`
+- **منك للمشروع:** ابعت تاسك في جروب Nest js → البوت يستقبله → يتخزن في `telegram-inbox/` → عادل يوزّع ويبعت **تحديثات مستمرة** لحد `/done`  
+  تشغيل الاستقبال: `npm run telegram:poll` (مهم يفضل شغال) أو Webhook على `/api/telegram/webhook`
 - **من الموظفين لك:**
 ```bash
 npm run telegram:notify -- --employee <adel|noura|mahmoud|mona|fatima> --type <intake|done|qa|close|progress> --file /tmp/report.txt
