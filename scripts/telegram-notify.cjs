@@ -79,6 +79,11 @@ function readStdin() {
 
 function employeeMeta(employee) {
   const map = {
+    sara: {
+      name: 'سارة',
+      role: 'استقبال وتواصل — تستلم الرسائل وتبلّغ المناسب',
+      emoji: '📨',
+    },
     adel: { name: 'عادل', role: 'مدير المشروع', emoji: '👔' },
     noura: { name: 'نورة', role: 'مصممة UI/UX', emoji: '🎨' },
     mahmoud: { name: 'محمود', role: 'مطور Backend', emoji: '🛠️' },

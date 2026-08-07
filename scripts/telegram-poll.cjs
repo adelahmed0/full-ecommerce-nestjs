@@ -233,22 +233,153 @@ function analyzeInstruction(text) {
     /الجميع|كل التيم|الفريق|الجماعة|كل واحد|التيم كله/i.test(text);
 
   const affected = [];
-  if (touchesAll || (!touchesNoura && !touchesMahmoud && !touchesMona && !touchesFatima && !touchesAdel)) {
+  const recipients = new Set();
+
+  if (touchesAll) {
     affected.push('كل الفريق');
+    ['adel', 'noura', 'mahmoud', 'mona', 'fatima'].forEach((id) =>
+      recipients.add(id),
+    );
+  } else if (
+    !touchesNoura &&
+    !touchesMahmoud &&
+    !touchesMona &&
+    !touchesFatima &&
+    !touchesAdel
+  ) {
+    affected.push('كل الفريق');
+    recipients.add('adel');
   } else {
-    if (touchesAdel) affected.push('عادل');
-    if (touchesNoura) affected.push('نورة');
-    if (touchesMahmoud) affected.push('محمود');
-    if (touchesMona) affected.push('منى');
-    if (touchesFatima) affected.push('فاطمة');
+    if (touchesAdel) {
+      affected.push('عادل');
+      recipients.add('adel');
+    }
+    if (touchesNoura) {
+      affected.push('نورة');
+      recipients.add('noura');
+    }
+    if (touchesMahmoud) {
+      affected.push('محمود');
+      recipients.add('mahmoud');
+    }
+    if (touchesMona) {
+      affected.push('منى');
+      recipients.add('mona');
+    }
+    if (touchesFatima) {
+      affected.push('فاطمة');
+      recipients.add('fatima');
+    }
+    // Adel always informed for standing instructions.
+    recipients.add('adel');
+    if (!affected.includes('عادل')) affected.push('عادل (للعلم)');
   }
 
   return {
     affected,
+    recipients: [...recipients],
     meaning: `اعتماد التعليمة كقاعدة شغل: ${text}`,
     action:
       'تسجيل التعليمة وتطبيقها على الشغل الجاي — من غير فتح دورة تاسك إلا لو طلبت تاسك صراحة',
   };
+}
+
+const EMPLOYEE_AR = {
+  adel: 'عادل',
+  noura: 'نورة',
+  mahmoud: 'محمود',
+  mona: 'منى',
+  fatima: 'فاطمة',
+  sara: 'سارة',
+};
+
+/**
+ * Sara: receive any inbound message and decide who to notify.
+ */
+function routeRecipients(kind, text) {
+  const lower = `${text}`.toLowerCase();
+  const named = {
+    adel: /عادل|مدير المشروع/i.test(text),
+    noura: /نورة|ui\/?ux|تصميم/i.test(lower),
+    mahmoud: /محمود|backend|nestjs|api|باك/i.test(lower),
+    mona: /منى|mona|react|frontend|فرونت/i.test(lower),
+    fatima: /فاطمة|qa|اختبار|postman/i.test(lower),
+  };
+
+  const recipients = new Set();
+  if (kind === 'task') {
+    recipients.add('adel');
+    Object.entries(named).forEach(([id, hit]) => {
+      if (hit) recipients.add(id);
+    });
+    return {
+      recipients: [...recipients],
+      reason: 'تاسك شغل → سارة بلّغت عادل للتفصيل' +
+        (recipients.size > 1 ? ' + الموظفين المذكورين' : ''),
+    };
+  }
+
+  const analysis = analyzeInstruction(text);
+  analysis.recipients.forEach((id) => recipients.add(id));
+  Object.entries(named).forEach(([id, hit]) => {
+    if (hit) recipients.add(id);
+  });
+  if (!recipients.size) recipients.add('adel');
+
+  return {
+    recipients: [...recipients],
+    reason: 'تعليمة/رسالة → سارة بلّغت الأشخاص المناسبين',
+    analysis,
+  };
+}
+
+function saraReceiveAndRoute({ kind, text, from, messageId }) {
+  const routing = routeRecipients(kind, text);
+  const names = routing.recipients
+    .map((id) => EMPLOYEE_AR[id] || id)
+    .join('، ');
+
+  notifyEmployee(
+    'sara',
+    'intake',
+    [
+      `الرسالة الواردة: ${text}`,
+      `النوع: ${kind === 'task' ? 'تاسك' : 'تعليمة/رسالة'}`,
+      `المرسل: ${from}`,
+      `رقم المتابعة: ${messageId}`,
+      `فهمت إيه: ${routing.reason}`,
+      `هبلّغ مين: ${names}`,
+      'ما اتعمل:',
+      '- استلام الرسالة من المستخدم',
+      '- تحديد الشخص/الأشخاص المناسبين',
+      '- التبليغ على تيليجرام',
+      'الحالة: تم الاستلام والتبليغ',
+      kind === 'task'
+        ? 'الخطوة الجاية: عادل يفصّل التاسك ويتوقف'
+        : 'الخطوة الجاية: المتأثرون يعتمدوا التعليمة في شغلهم',
+    ].join('\n'),
+  );
+
+  for (const employee of routing.recipients) {
+    notifyEmployee(
+      employee,
+      'update',
+      [
+        'تبليغ من سارة — رسالة واردة من المستخدم',
+        `النوع: ${kind === 'task' ? 'تاسك' : 'تعليمة/رسالة'}`,
+        `الرسالة: ${text}`,
+        `المرسل: ${from}`,
+        `رقم المتابعة: ${messageId}`,
+        `ليه وصلك: ${routing.reason}`,
+        employee === 'adel' && kind === 'task'
+          ? 'المطلوب منك: فصّل التاسك وحدد مين يعمل إيه — من غير تنفيذ'
+          : 'المطلوب منك: خُد علم وطبق لو يخصك',
+        'الحالة: تم التبليغ بواسطة سارة',
+      ].join('\n'),
+    );
+  }
+
+  return routing;
 }
 
 function writeInstructionInbox(item) {
@@ -505,6 +636,7 @@ function shouldIgnore(text, fromIsBot, chatId) {
     return true;
   if (text.startsWith('🎨') || text.startsWith('⚛️') || text.startsWith('📥'))
     return true;
+  if (text.startsWith('📨') || text.startsWith('🔔')) return true;
   if (text.startsWith('📋') || text.startsWith('📌') || text.startsWith('🟢'))
     return true;
   if (text.startsWith('📍')) return true;
@@ -596,13 +728,26 @@ async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
   all.unshift(item);
   writeInstructions(all.slice(0, 50));
 
+  // 1) Sara receives any message and notifies the right people
+  const routing = saraReceiveAndRoute({
+    kind: 'instruction',
+    text,
+    from,
+    messageId: id,
+  });
+  const notifiedNames = routing.recipients
+    .map((emp) => EMPLOYEE_AR[emp] || emp)
+    .join('، ');
+
   await sendMessage(
     chatId,
     [
-      '📥 تم استلام التعليمة',
+      '📥 سارة استلمت الرسالة',
       `رقم المتابعة: ${id}`,
+      `النوع: تعليمة/رسالة`,
+      `هتبلّغ: ${notifiedNames}`,
       '',
-      'عادل هيسجّلها ويوضّح تأثيرها على الفريق — من غير فتح تاسك.',
+      'عادل هيسجّل التعليمة ويوضّح تأثيرها — من غير فتح تاسك.',
     ].join('\n'),
   );
 
@@ -610,7 +755,7 @@ async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
     'adel',
     'intake',
     [
-      `النوع: تعليمة (مش تاسك)`,
+      `النوع: تعليمة (مش تاسك) — وصل عبر سارة`,
       `التعليمة: ${text}`,
       `شرح التعليمة: ${analysis.meaning}`,
       `المرسل: ${from}`,
@@ -618,14 +763,12 @@ async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
       `instructionId: ${id}`,
       '',
       `مين هيتأثر: ${analysis.affected.join('، ')}`,
+      `سارة بلّغت: ${notifiedNames}`,
       `الإجراء: ${analysis.action}`,
       '',
       'دور عادل الآن:',
       '- تسجيل التعليمة وشرحها للفريق فقط',
       '- مفيش تنفيذ كود ومفيش فتح دورة تاسك',
-      'ما هيحصل بعد كده:',
-      '- أي تاسك جاية تلتزم بالتعليمة دي',
-      '- لو حابب تفتح شغل تنفيذي ابعت: تاسك: ...',
       'الحالة: تم استلام وتسجيل التعليمة',
       'الخطوة الجاية: تطبيق التعليمة على الشغل الجاي',
     ].join('\n'),
@@ -635,9 +778,10 @@ async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
     sendMessage(
       chatId,
       [
-        '📌 رد عادل على التعليمة',
+        '📌 سارة بلّغت + رد عادل على التعليمة',
         `التعليمة: ${text}`,
         `رقم المتابعة: ${id}`,
+        `سارة بلّغت: ${notifiedNames}`,
         '',
         `فهمت إنها تعليمة/قاعدة شغل.`,
         `المتأثرون: ${analysis.affected.join('، ')}`,
@@ -650,7 +794,7 @@ async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
     ).catch((error) => console.error('[instruction-summary]', error.message));
   }, 1200);
 
-  console.log(`[telegram:poll] instruction recorded: ${id}`);
+  console.log(`[telegram:poll] instruction recorded via Sara: ${id}`);
 }
 
 async function closeTask(chatId, taskId) {
@@ -710,12 +854,24 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
   open.unshift(task);
   writeOpenTasks(open.slice(0, 20));
 
-  // 1) Immediate plain ack
+  // 1) Sara receives first and notifies the right people
+  const routing = saraReceiveAndRoute({
+    kind: 'task',
+    text,
+    from,
+    messageId: id,
+  });
+  const notifiedNames = routing.recipients
+    .map((emp) => EMPLOYEE_AR[emp] || emp)
+    .join('، ');
+
   await sendMessage(
     chatId,
     [
-      '📋 تم استلام التاسك',
+      '📥 سارة استلمت الرسالة',
       `رقم المتابعة: ${id}`,
+      'النوع: تاسك',
+      `هتبلّغ: ${notifiedNames}`,
       '',
       'عادل هيفصّل التاسك دلوقتي: كل واحد هيعمل إيه — من غير تنفيذ.',
     ].join('\n'),
@@ -742,9 +898,10 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
     'intake',
     [
       `التاسك: ${text}`,
-      `شرح التاسك: كمدير مشروع فصلت التاسك فقط وحددت مين يعمل إيه (المرسل: ${from}) — مفيش تنفيذ من عادل`,
+      `شرح التاسك: وصل عبر سارة — كمدير مشروع فصلت التاسك فقط وحددت مين يعمل إيه (المرسل: ${from}) — مفيش تنفيذ من عادل`,
       'البرانش: cursor/backend-dev-475f',
       `taskId: ${id}`,
+      `سارة بلّغت: ${notifiedNames}`,
       '',
       'مين هيتدخل:',
       `- نورة: ${nouraActive ? 'مطلوب' : 'غير مطلوب'}`,
@@ -784,9 +941,10 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
     sendMessage(
       chatId,
       [
-        '📌 توزيع عادل — تفصيل فقط (بدون تنفيذ)',
+        '📌 سارة بلّغت → توزيع عادل (تفصيل فقط)',
         `التاسك العامة: ${text}`,
         `رقم المتابعة: ${id}`,
+        `سارة بلّغت: ${notifiedNames}`,
         '',
         'مين هيعمل إيه:',
         `- نورة: ${nouraActive ? 'مطلوب' : 'غير مطلوب'}`,
@@ -809,7 +967,7 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
         'الترتيب:',
         ...planSteps,
         '',
-        'عادل خلص دوره هنا بالتفصيل والتوزيع. التنفيذ بعد استدعاء الموظفين.',
+        'سارة استلمت وبلّغت. عادل خلص التفصيل. التنفيذ بعد استدعاء الموظفين.',
         'للمتابعة: /status | للإغلاق: /done',
       ].join('\n'),
     ).catch((error) => console.error('[plan-summary]', error.message));
@@ -1008,12 +1166,12 @@ async function main() {
     [
       '🟢 نظام الاستقبال شغال',
       '',
-      'ابعت تعليمات أو تاسكات عادي.',
+      'سارة بتستلم أي رسالة/تعليمة وتبلّغ الشخص المناسب.',
       'تعليمة: قاعدة شغل (بيتسجل — من غير دورة تنفيذ)',
-      'تاسك: شغل للتنفيذ (عادل يفصّل مين يعمل إيه)',
+      'تاسك: شغل للتنفيذ (سارة → عادل يفصّل مين يعمل إيه)',
       '',
       'أمثلة:',
-      'تعليمة: عادل يفصّل بس ومينفذش',
+      'تعليمة: محمود يهتم بالـ validation',
       'تاسك: CRUD للـ Brand',
       '',
       'الأوامر:',
