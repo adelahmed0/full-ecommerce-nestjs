@@ -192,41 +192,70 @@ export class TelegramService {
     });
     this.writeInboxFiles(inbox, String(task._id));
 
-    const ack = [
-      '📋 عادل استلم التاسك من تيليجرام',
-      '',
-      `التاسك: ${text}`,
-      `رقم المتابعة: ${String(task._id)}`,
-      '',
-      'هوزّع الشغل على الفريق وأبلّغكم بالتحديثات هنا.',
-    ].join('\n');
+    const taskId = String(task._id);
+    await this.sendMessage(
+      chatId,
+      [
+        '📋 تم استلام التاسك',
+        `رقم المتابعة: ${taskId}`,
+        '',
+        'عادل هيوزّع الشغل دلوقتي وهتبعتلك خطة التوزيع كاملة...',
+      ].join('\n'),
+    );
 
-    await this.sendMessage(chatId, ack);
+    const lower = text.toLowerCase();
+    const needsBackend = /api|crud|endpoint|backend|nestjs|باك|ايند/.test(
+      `${lower} ${text}`,
+    );
+    const needsFrontend = /react|frontend|ui|ux|موقع|فرونت|واجهة|تصميم/.test(
+      `${lower} ${text}`,
+    );
+    const noura = needsFrontend ? 'تصميم التدفقات والشاشات' : 'غير مطلوب';
+    const mahmoud =
+      needsBackend || !needsFrontend
+        ? 'تنفيذ/تجهيز جزء الـ Backend API'
+        : 'دعم الـ API لو منى احتاجت';
+    const mona = needsFrontend ? 'تنفيذ React وربط الموقع' : 'غير مطلوب';
+    const fatima = needsFrontend
+      ? 'اختبار Postman + تجربة الموقع على كل أحجام الشاشات'
+      : 'اختبار Postman للـ endpoints';
 
-    // Also post a structured employee-style intake note to the same chat.
-    const adelNote = [
-      'التاسك: وارد من تيليجرام',
-      `شرح التاسك: ${text}`,
-      'البرانش: cursor/backend-dev-475f',
-      `شغل محمود: يتحدد بعد تحليل عادل`,
-      `شغل منى: يتحدد بعد تحليل عادل`,
-      `شغل نورة: يتحدد بعد تحليل عادل`,
-      `شغل فاطمة: اختبار بعد التنفيذ`,
-      'الحالة: تم الاستلام من تيليجرام',
-      'الخطوة الجاية: توزيع عادل على الفريق',
-    ].join('\n');
+    const plan: string[] = [];
+    if (noura !== 'غير مطلوب') plan.push('1) نورة تبدأ تصميم UI/UX');
+    if (mahmoud !== 'غير مطلوب') {
+      plan.push(`${plan.length + 1}) محمود ينفّذ Backend`);
+    }
+    if (mona !== 'غير مطلوب') {
+      plan.push(`${plan.length + 1}) منى تنفّذ React وتربط الـ API`);
+    }
+    plan.push(`${plan.length + 1}) فاطمة تختبر`);
+    plan.push(`${plan.length + 1}) إصلاحات لو لزم ثم قبول/إغلاق`);
 
     try {
-      // Reuse notify script formatting via direct simple message if script spawn is heavy.
       await this.sendMessage(
         chatId,
-        `👔 عادل — استلام تاسك\n──────────────\n${adelNote}`,
+        [
+          '📌 ملخص توزيع عادل',
+          `التاسك: ${text}`,
+          `رقم المتابعة: ${taskId}`,
+          '',
+          'مين هيعمل إيه:',
+          `🎨 نورة: ${noura}`,
+          `🛠️ محمود: ${mahmoud}`,
+          `⚛️ منى: ${mona}`,
+          `✅ فاطمة: ${fatima}`,
+          '',
+          'إيه اللي هيحصل:',
+          ...plan,
+          '',
+          'هتبعتلك تحديثات طول الوقت هنا.',
+        ].join('\n'),
       );
     } catch (error) {
-      this.logger.error('Failed to send Adel follow-up note', error as Error);
+      this.logger.error('Failed to send Adel distribution plan', error as Error);
     }
 
-    return { ok: true, taskId: String(task._id) };
+    return { ok: true, taskId };
   }
 
   findRecent(limit = 20) {

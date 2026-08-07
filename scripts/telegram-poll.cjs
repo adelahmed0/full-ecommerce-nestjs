@@ -276,31 +276,86 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
       '📋 تم استلام التاسك',
       `رقم المتابعة: ${id}`,
       '',
-      'هبدأ أبعت تحديثات مستمرة هنا دلوقتي...',
+      'عادل هيوزّع الشغل دلوقتي وهتبعتلك خطة التوزيع كاملة...',
     ].join('\n'),
   );
 
-  // 2) Adel intake (formatted)
+  // 2) Adel full distribution plan (formatted notify)
+  const planSteps = [];
+  if (assignment.noura !== 'غير مطلوب') {
+    planSteps.push('1) نورة تبدأ تصميم UI/UX والتدفقات');
+  }
+  if (assignment.mahmoud !== 'غير مطلوب') {
+    planSteps.push(
+      `${planSteps.length + 1}) محمود ينفّذ/يجهّز جزء الـ Backend API`,
+    );
+  }
+  if (assignment.mona !== 'غير مطلوب') {
+    planSteps.push(
+      `${planSteps.length + 1}) منى تنفّذ واجهة React وتربطها بالـ API`,
+    );
+  }
+  planSteps.push(
+    `${planSteps.length + 1}) فاطمة تختبر (Postman و/أو الموقع على كل الشاشات)`,
+  );
+  planSteps.push(
+    `${planSteps.length + 1}) لو في ملاحظات: رجوع للإصلاح ثم إعادة اختبار`,
+  );
+  planSteps.push(
+    `${planSteps.length + 1}) بعد القبول: عادل بيقفل التاسك (أو /done)`,
+  );
+
   notifyEmployee(
     'adel',
     'intake',
     [
       `التاسك: ${text}`,
-      `شرح التاسك: تم استلام التاسك من تيليجرام بواسطة ${from}`,
+      `شرح التاسك: استلمت طلبك من تيليجرام (المرسل: ${from}) وهوزّع الشغل كالتالي`,
       'البرانش: cursor/backend-dev-475f',
-      `شغل نورة: ${assignment.noura}`,
-      `شغل محمود: ${assignment.mahmoud}`,
-      `شغل منى: ${assignment.mona}`,
-      `شغل فاطمة: ${assignment.fatima}`,
+      `taskId: ${id}`,
+      'التوزيع:',
+      `- نورة: ${assignment.noura}`,
+      `- محمود: ${assignment.mahmoud}`,
+      `- منى: ${assignment.mona}`,
+      `- فاطمة: ${assignment.fatima}`,
+      'خطة التنفيذ:',
+      ...planSteps.map((step) => `- ${step}`),
+      'ما هيحصل دلوقتي:',
+      '- هتوصلك تقارير من كل موظف لما يبدأ/يخلص',
+      '- وهيبعت عادل تحديثات متابعة دورية لحد ما التاسك تتقفل',
       'معايير القبول:',
-      '- تنفيذ المطلوب',
-      '- قبول فاطمة قبل الإغلاق',
-      'الحالة: تم الاستلام والتوزيع المبدئي',
-      'الخطوة الجاية: بدء التنفيذ وإرسال تحديثات مستمرة',
+      '- تنفيذ المطلوب حسب التوزيع',
+      '- قبول فاطمة النهائي قبل الإغلاق',
+      'الحالة: تم التوزيع — التنفيذ بدأ',
+      'الخطوة الجاية: متابعة تقارير الفريق هنا على الجروب',
     ].join('\n'),
   );
 
-  // 3) Quick follow-up statuses
+  // 3) Extra plain Arabic summary so the plan is very obvious in-chat
+  setTimeout(() => {
+    sendMessage(
+      chatId,
+      [
+        '📌 ملخص توزيع عادل',
+        `التاسك: ${text}`,
+        `رقم المتابعة: ${id}`,
+        '',
+        'مين هيعمل إيه:',
+        `🎨 نورة: ${assignment.noura}`,
+        `🛠️ محمود: ${assignment.mahmoud}`,
+        `⚛️ منى: ${assignment.mona}`,
+        `✅ فاطمة: ${assignment.fatima}`,
+        '',
+        'إيه اللي هيحصل:',
+        ...planSteps,
+        '',
+        'هتبعتلك تحديثات طول الوقت هنا.',
+        'للمتابعة: /status | للإغلاق: /done',
+      ].join('\n'),
+    ).catch((error) => console.error('[plan-summary]', error.message));
+  }, 1500);
+
+  // 4) Quick follow-up statuses
   setTimeout(() => {
     notifyEmployee(
       'adel',
@@ -308,14 +363,16 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
       [
         `التاسك: ${text}`,
         `taskId: ${id}`,
-        'الحالة: جاري متابعة التنفيذ مع الفريق',
-        `شغل محمود الآن: ${assignment.mahmoud}`,
-        `شغل منى الآن: ${assignment.mona}`,
-        `شغل نورة الآن: ${assignment.noura}`,
-        'الخطوة الجاية: تحديث دوري كل دقيقة تقريبًا لحد ما التاسك تتقفل بـ /done',
+        'الحالة: التوزيع اتبعتلك — وجاري متابعة التنفيذ مع الفريق',
+        'التوزيع الحالي:',
+        `- نورة: ${assignment.noura}`,
+        `- محمود: ${assignment.mahmoud}`,
+        `- منى: ${assignment.mona}`,
+        `- فاطمة: ${assignment.fatima}`,
+        'الخطوة الجاية: استلام تقارير الموظفين ثم تحديث دوري لحد /done',
       ].join('\n'),
     );
-  }, 2500);
+  }, 4000);
 
   if (assignment.needsBackend) {
     setTimeout(() => {
