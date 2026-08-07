@@ -50,6 +50,14 @@ node scripts/telegram-notify.cjs --employee mahmoud --type done --file /tmp/repo
 npm run telegram:notify -- --employee adel --type intake --file /tmp/report.txt
 ```
 
+| الموظف | `--employee` | `--type` الشائع |
+|--------|--------------|------------------|
+| عادل | `adel` | `intake` / `close` |
+| محمود | `mahmoud` | `progress` / `done` |
+| منى | `mona` | `progress` / `done` |
+| فاطمة | `fatima` | `qa` |
+| GitHub | `system` | `git` |
+
 الرسالة على تيليجرام بتطلع مقسّمة بعناوين وأيقونات تلقائيًا.
 
 ## 5) GitHub Actions

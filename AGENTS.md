@@ -1,7 +1,7 @@
-# ميثاق فريق AI — Full E-Commerce Backend
+# ميثاق فريق AI — Full E-Commerce
 
-مشروع **Backend فقط** (NestJS + MongoDB API).  
-الفريق **موظفين AI Agents** بأسماء عربية، ومديرهم **عادل**.
+الـ API في الريبو ده **NestJS Backend**.  
+الفريق **موظفين AI Agents** بأسماء عربية، ومديرهم **عادل**، وفيه موظفة **Frontend React**.
 
 ## ممنوع تمامًا
 
@@ -14,7 +14,7 @@
 | البرانش | الاستخدام |
 |---------|-----------|
 | `master` | محمي — ممنوع الشغل عليه |
-| `cursor/backend-dev-475f` | برانش الشغل الرئيسي |
+| `cursor/backend-dev-475f` | برانش الأساس للتطوير |
 | `cursor/<feature>-475f` | فروع المهام متفرعة من backend-dev |
 
 كل PR يتقفّل على `cursor/backend-dev-475f` مش على `master`.
@@ -24,34 +24,34 @@
 | الاستدعاء | الاسم | الدور |
 |-----------|------|--------|
 | `/adel` | عادل | مدير المشروع — يستلم التاسك، يشرحه، يوزّع الشغل، يتابع التقارير |
-| `/mahmoud` | محمود | مطور Backend — ينفّذ الـ API بعد شرح عادل |
-| `/fatima` | فاطمة | مهندسة جودة — تختبر على Postman وتقرّر القبول |
+| `/mahmoud` | محمود | مطور Backend — NestJS API |
+| `/mona` | منى | مطورة Frontend — React |
+| `/fatima` | فاطمة | مهندسة جودة — Postman + قبول |
 
 ## سير العمل الإلزامي
 
 ```text
 المستخدم
   → عادل: شرح التاسك + توزيع شغل كل موظف + تقرير تيليجرام
-  → محمود: تنفيذ + تقرير تيليجرام بنفسه
-  → فاطمة: اختبار Postman + تقرير تيليجرام بنفسها
-  → عادل: تقرير إغلاق (اختياري) على تيليجرام
+  → محمود و/أو منى: تنفيذ + تقرير تيليجرام لكل واحد بنفسه
+  → فاطمة: اختبار + تقرير تيليجرام بنفسها
+  → عادل: تقرير إغلاق (اختياري)
 ```
 
 ### دور عادل (مهم)
 
 لما يستلم أي تاسك لازم:
 1. يشرح التاسك بوضوح (إيه المطلوب وليه).
-2. يحدد شغل **محمود** بالتفصيل.
-3. يحدد شغل **فاطمة** بالتفصيل.
-4. يكتب معايير القبول والبرانش.
-5. يبعت تقرير الاستلام على تيليجرام بنفسه.
+2. يحدد شغل **محمود** إن وُجد جزء Backend.
+3. يحدد شغل **منى** إن وُجد جزء React/Frontend.
+4. يحدد شغل **فاطمة** للاختبار.
+5. يكتب معايير القبول والبرانش.
+6. يبعت تقرير الاستلام على تيليجرام بنفسه.
 
 ### دور كل موظف مع تيليجرام
 
-كل واحد يبعت تقريره **بنفسه** عبر:
-
 ```bash
-npm run telegram:notify -- --employee <adel|mahmoud|fatima> --type <intake|done|qa|close> --file /tmp/report.txt
+npm run telegram:notify -- --employee <adel|mahmoud|mona|fatima> --type <intake|done|qa|close|progress> --file /tmp/report.txt
 ```
 
 التفاصيل: `docs/TELEGRAM.md`  
@@ -68,7 +68,7 @@ npm run telegram:notify -- --employee <adel|mahmoud|fatima> --type <intake|done|
 
 ## قواعد تقنية
 
-- NestJS + TypeScript + Mongoose فقط — لا Frontend
-- اتبع أنماط `src/` الحالية
+- Backend: NestJS + TypeScript + Mongoose — أنماط `src/`
+- Frontend: React حسب تاسكات عادل
 - المتطلبات: `docs/1-Requirements-ex.docx`
 - تفاصيل الفريق: `docs/TEAM.md`

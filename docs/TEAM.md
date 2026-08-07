@@ -1,8 +1,8 @@
-# فريق الموظفين AI — Backend فقط
+# فريق الموظفين AI
 
 ## الملخص
 
-تيم سوفت وير كامل للمشروع كـ **AI Agents** بأسماء عربية.  
+تيم سوفت وير كـ **AI Agents** بأسماء عربية.  
 مدير المشروع: **عادل**.  
 الشغل على `cursor/backend-dev-475f` — **مش على `master`**.  
 كل موظف يبعت تقريره على جروب التيليجرام بنفسه.
@@ -12,8 +12,9 @@
 | Agent | الاسم | الدور | ماذا يفعل |
 |-------|------|--------|-----------|
 | `/adel` | عادل | مدير المشروع | يستلم التاسك، يشرحه، يحدد شغل كل واحد، يتابع، يبعت تقرير |
-| `/mahmoud` | محمود | Backend | ينفّذ الـ APIs بعد توزيع عادل، يبعت تقرير إنجاز |
-| `/fatima` | فاطمة | QA / Postman | تختبر، تحدّث `postman/`، تبعت تقرير قبول/رفض |
+| `/mahmoud` | محمود | Backend (NestJS) | ينفّذ الـ APIs بعد توزيع عادل |
+| `/mona` | منى | Frontend (React) | تنفّذ واجهات React بعد توزيع عادل |
+| `/fatima` | فاطمة | QA / Postman | تختبر، تحدّث `postman/`، تقرير قبول/رفض |
 
 ## عادل يحدد التاسكات هكذا
 
@@ -22,11 +23,12 @@
 شرح التاسك: ...
 البرانش: cursor/...-475f (من cursor/backend-dev-475f)
 شغل محمود: ...
+شغل منى: ...
 شغل فاطمة: ...
 معايير القبول:
 - ...
-الحالة: بانتظار تنفيذ محمود
-الخطوة الجاية: /mahmoud ...
+الحالة: بانتظار التنفيذ
+الخطوة الجاية: /mahmoud أو /mona ...
 ```
 
 ثم يبعت التقرير تيليجرام:
@@ -40,12 +42,14 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/adel-report
 |--------|------|
 | عادل | `--employee adel --type intake` أو `close` |
 | محمود | `--employee mahmoud --type done` أو `progress` |
+| منى | `--employee mona --type done` أو `progress` |
 | فاطمة | `--employee fatima --type qa` |
 
 ## الملفات
 
 - `.cursor/agents/adel.md`
 - `.cursor/agents/mahmoud.md`
+- `.cursor/agents/mona.md`
 - `.cursor/agents/fatima.md`
 - `AGENTS.md`
 - `docs/TELEGRAM.md`
