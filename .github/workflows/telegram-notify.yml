@@ -1,0 +1,55 @@
+name: Telegram notifications
+
+on:
+  push:
+    branches:
+      - cursor/backend-dev-475f
+      - 'cursor/**'
+  pull_request:
+    branches:
+      - cursor/backend-dev-475f
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Notify Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notify"
+            exit 0
+          fi
+
+          EVENT="${{ github.event_name }}"
+          REF="${{ github.ref_name }}"
+          ACTOR="${{ github.actor }}"
+          SHA="${{ github.sha }}"
+          REPO="${{ github.repository }}"
+          TITLE="${{ github.event.pull_request.title }}"
+          if [ -z "$TITLE" ]; then
+            TITLE="${{ github.event.head_commit.message }}"
+          fi
+          if [ -z "$TITLE" ]; then
+            TITLE="git update"
+          fi
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          LINK="$PR_URL"
+          if [ -z "$LINK" ]; then
+            LINK="${{ github.server_url }}/$REPO/commit/$SHA"
+          fi
+
+          MSG=$(printf 'حدث Git في المشروع\nالنوع: %s\nالبرانش: %s\nبواسطة: %s\nالعنوان: %s\nSHA: %s\nالرابط: %s\n' \
+            "$EVENT" "$REF" "$ACTOR" "$TITLE" "$SHA" "$LINK")
+
+          node scripts/telegram-notify.mjs --employee system --type git --message "$MSG"
