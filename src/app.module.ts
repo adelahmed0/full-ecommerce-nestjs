@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ProfileModule } from './profile/profile.module';
 import { CategoryModule } from './category/category.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CategoryModule } from './category/category.module';
     AuthModule,
     ProfileModule,
     CategoryModule,
+    TelegramModule,
   ],
   controllers: [],
   providers: [

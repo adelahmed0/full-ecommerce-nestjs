@@ -42,6 +42,10 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# Telegram inbound task inbox (runtime)
+telegram-inbox/*
+!telegram-inbox/README.md
+
 # temp directory
 .temp
 .tmp

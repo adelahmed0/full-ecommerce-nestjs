@@ -59,8 +59,11 @@
 - **Frontend:** تجربة الموقع الحقيقي على **جميع أحجام الشاشات** (Mobile/Tablet/Desktop) + صور/فيديوهات تحت `artifacts/qa/`
 - أي مشكلة على أي حجم شاشة = رفض، ويرجع التيم يصلّح ثم إعادة اختبار
 
-### تيليجرام
+### تيليجرام (اتجاهين)
 
+- **منك للمشروع:** ابعت تاسك في جروب Nest js → البوت يستقبله → يتخزن في `telegram-inbox/` → عادل يوزّع  
+  تشغيل الاستقبال: `npm run telegram:poll` أو Webhook على `/api/telegram/webhook`
+- **من الموظفين لك:**
 ```bash
 npm run telegram:notify -- --employee <adel|noura|mahmoud|mona|fatima> --type <intake|done|qa|close|progress> --file /tmp/report.txt
 ```

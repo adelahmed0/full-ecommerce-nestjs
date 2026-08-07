@@ -26,4 +26,7 @@ export enum ApiMessage {
   PASSWORD_RESET = 'Password reset successfully',
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
+
+  TELEGRAM_UPDATE_RECEIVED = 'Telegram update received',
+  TELEGRAM_TASKS_FETCHED = 'Telegram tasks fetched successfully',
 }

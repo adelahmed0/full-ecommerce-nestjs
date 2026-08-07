@@ -1,50 +1,57 @@
 # ربط المشروع بجروب تيليجرام
 
-كل تحديثات الموظفين (عادل / محمود / فاطمة) وتحديثات Git تتبعت للجروب عبر بوت تيليجرام.
+البوت بيبعت تقارير الموظفين، وكمان **يستقبل منك رسايل وتاسكات عادي** من الجروب.
 
-## 1) تجهيز البوت والجروب
+## 1) التجهيز
 
-1. من BotFather اعمل بوت وخد `TELEGRAM_BOT_TOKEN`.
-2. ضيف البوت لجروب التيليجرام وخلّيه يقدر يبعت رسائل.
-3. جيب `TELEGRAM_CHAT_ID` للجروب (رقم سالب عادةً للجروبات).
-4. حط القيم في `.env` محليًا، وفي Cursor Secrets، وفي GitHub Actions Secrets.
-
-## 2) المتغيرات
+1. بوت من BotFather + `TELEGRAM_BOT_TOKEN`
+2. البوت Admin في الجروب
+3. `TELEGRAM_CHAT_ID` للجروب
+4. القيم في `.env` / Cursor Secrets / GitHub Secrets
 
 ```bash
-TELEGRAM_BOT_TOKEN=123456:ABCDEF...
-TELEGRAM_CHAT_ID=-1001234567890
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHAT_ID=-100...
+TELEGRAM_WEBHOOK_URL=https://your-domain.com/api/telegram/webhook
+TELEGRAM_WEBHOOK_SECRET=optional-secret
 ```
 
-موجودة أيضًا في `.env.example`.
+## 2) إرسال تاسك من تيليجرام (أنت → المشروع)
 
-## 3) إرسال يدوي
-
-```bash
-npm run telegram:notify -- --employee adel --type intake --message "تم استلام تاسك Category"
-```
-
-أو:
-
-```bash
-node scripts/telegram-notify.cjs --employee mahmoud --type done --file /tmp/report.txt
-```
-
-## 4) سلوك الموظفين
-
-بعد أي تقرير، الموظف يكتب ملف واضح بهذا الشكل:
+ابعت رسالة عادية في جروب **Nest js** (mention للبوت لو privacy mode شغال):
 
 ```text
-التاسك: CRUD Brand
-الفهم: إضافة وحدة brands
-التوزيع:
-- محمود: تنفيذ
-- فاطمة: Postman
-الحالة: بانتظار تنفيذ محمود
-الخطوة الجاية: /mahmoud
+@Full_ecommerce_nest_bot عايز CRUD للـ Brand
 ```
 
-ثم يشغّل:
+أو أي نص تاسك واضح.
+
+المفروض يحصل:
+1. البوت يرد: عادل استلم التاسك
+2. التاسك يتسجل ويتكتب في `telegram-inbox/latest-task.txt`
+3. عادل يوزّع على الفريق ويبعت التحديثات للجروب
+
+### تشغيل الاستقبال محليًا (أسهل)
+
+```bash
+npm run telegram:poll
+```
+
+خلي الأمر شغال، وبعدين ابعت تاسك من الجروب.
+
+### تشغيل الاستقبال على السيرفر (Webhook)
+
+1. شغّل الـ API
+2. اربط الدومين:
+```bash
+npm run telegram:set-webhook -- https://your-domain.com/api/telegram/webhook
+```
+3. Endpoint: `POST /api/telegram/webhook`
+
+عرض التاسكات (Admin):
+`GET /api/telegram/tasks`
+
+## 3) إرسال تقارير الموظفين (المشروع → تيليجرام)
 
 ```bash
 npm run telegram:notify -- --employee adel --type intake --file /tmp/report.txt
@@ -56,12 +63,9 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/report.txt
 | نورة | `noura` | `progress` / `done` |
 | محمود | `mahmoud` | `progress` / `done` |
 | منى | `mona` | `progress` / `done` |
-| فاطمة | `fatima` | `qa` (Postman + تجربة الموقع على كل الشاشات/صور/فيديو) |
+| فاطمة | `fatima` | `qa` |
 | GitHub | `system` | `git` |
 
-الرسالة على تيليجرام بتطلع مقسّمة بعناوين وأيقونات تلقائيًا.
+## 4) GitHub Actions
 
-## 5) GitHub Actions
-
-Workflow: `.github/workflows/telegram-notify.yml`  
-يبعت عند push/PR على فروع الشغل. يحتاج نفس الـ secrets في إعدادات GitHub.
+`.github/workflows/telegram-notify.yml` يبعت تحديثات Git عند توفر الأسرار.
