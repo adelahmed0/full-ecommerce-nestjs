@@ -95,7 +95,7 @@ function employeeMeta(employee) {
 
 function typeMeta(type) {
   const map = {
-    intake: { title: 'استلام تاسك', emoji: '📥' },
+    intake: { title: 'استلام وارد (تعليمة/تاسك)', emoji: '📥' },
     progress: { title: 'تحديث تنفيذ', emoji: '⏳' },
     done: { title: 'تقرير إنجاز', emoji: '📤' },
     qa: { title: 'تقرير جودة', emoji: '🧪' },
@@ -252,14 +252,17 @@ function buildBody(employee, type, message) {
       ? fields.map((field) => renderField(field)).join(`\n\n`)
       : escapeHtml(message);
 
-  return [...header, body].join('\n').slice(0, 3900);
+  const full = [...header, body].join('\n');
+  // Truncate only after complete tags to avoid broken HTML parse_mode.
+  if (full.length <= 3900) return full;
+  return `${full.slice(0, 3890)}\n…`;
 }
 
-function postTelegram(token, chatId, text) {
+function postTelegram(token, chatId, text, parseMode = 'HTML') {
   const payload = JSON.stringify({
     chat_id: chatId,
     text,
-    parse_mode: 'HTML',
+    ...(parseMode ? { parse_mode: parseMode } : {}),
     disable_web_page_preview: true,
   });
 
@@ -327,7 +330,20 @@ async function main() {
   }
 
   const text = buildBody(args.employee, args.type, message);
-  await postTelegram(token, chatId, text);
+  try {
+    await postTelegram(token, chatId, text, 'HTML');
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (!msg.includes("can't parse entities")) throw error;
+    // Fallback: plain text if HTML got truncated/broken.
+    const plain = [
+      `${typeMeta(args.type).emoji} ${typeMeta(args.type).title}`,
+      `${employeeMeta(args.employee).emoji} ${employeeMeta(args.employee).name}`,
+      '',
+      message.slice(0, 3500),
+    ].join('\n');
+    await postTelegram(token, chatId, plain, null);
+  }
   console.log('Telegram notification sent');
 }
 
