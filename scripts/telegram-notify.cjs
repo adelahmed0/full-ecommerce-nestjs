@@ -85,7 +85,7 @@ function employeeMeta(employee) {
     mona: { name: 'منى', role: 'مطورة Frontend React', emoji: '⚛️' },
     fatima: {
       name: 'فاطمة',
-      role: 'جودة — Postman + تجربة الموقع',
+      role: 'جودة — Postman + كل أحجام الشاشات',
       emoji: '✅',
     },
     system: { name: 'النظام', role: 'تحديثات Git', emoji: '⚙️' },
