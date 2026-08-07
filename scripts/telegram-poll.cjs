@@ -132,29 +132,76 @@ function writeOpenTasks(tasks) {
 
 function analyzeTask(text) {
   const lower = text.toLowerCase();
-  const arabic = text;
+  const blob = `${lower} ${text}`;
   const needsBackend =
-    /api|crud|endpoint|backend|nestjs|mongo|postman|endpoint|ايند ?بوينت|باك/i.test(
-      `${lower} ${arabic}`,
-    );
+    /api|crud|endpoint|backend|nestjs|mongo|postman|ايند ?بوينت|باك/i.test(blob);
   const needsFrontend =
-    /react|frontend|ui|ux|موقع|فرونت|شاشة|واجهة|تصميم/i.test(
-      `${lower} ${arabic}`,
-    );
-  const needsDesign = /ui|ux|تصميم|تجربة|شاشات/i.test(`${lower} ${arabic}`);
+    /react|frontend|ui|ux|موقع|فرونت|شاشة|واجهة|تصميم/i.test(blob);
+  const needsDesign = /ui|ux|تصميم|تجربة|شاشات/i.test(blob);
+  const involveBackend = needsBackend || (!needsFrontend && !needsDesign);
+  const involveFrontend = needsFrontend || needsDesign;
 
-  // Default: if unclear, involve backend lead.
-  const mahmoud =
-    needsBackend || (!needsFrontend && !needsDesign)
-      ? 'تحليل وتنفيذ جزء الـ API المطلوب'
-      : 'دعم الـ API لو منى احتاجت';
-  const noura = needsDesign || needsFrontend ? 'تصميم التدفقات والشاشات' : 'غير مطلوب';
-  const mona = needsFrontend || needsDesign ? 'تنفيذ React وربط الموقع' : 'غير مطلوب';
-  const fatima = needsFrontend
-    ? 'اختبار Postman للباك + تجربة الموقع على كل أحجام الشاشات'
-    : 'اختبار Postman للـ endpoints';
+  const noura = involveFrontend
+    ? [
+        `المطلوب: تصميم تجربة المستخدم المتعلقة بـ (${text})`,
+        'المخرجات: تدفقات الشاشات + حالات (تحميل/فارغ/خطأ) + ملاحظات UI لمنى',
+        'الاعتماديات: يبدأ قبل تنفيذ منى',
+        'معيار التسليم: مواصفات واضحة قابلة للتنفيذ بدون غموض',
+      ].join(' | ')
+    : 'غير مطلوب في التاسك الحالي';
 
-  return { mahmoud, noura, mona, fatima, needsBackend, needsFrontend };
+  const mahmoud = involveBackend
+    ? [
+        `المطلوب: تنفيذ/تجهيز Backend API الخاصة بـ (${text})`,
+        'المخرجات: endpoints + DTOs/validation + صلاحيات Admin/User حسب الحاجة',
+        'الاعتماديات: يسلّم عقود API لمنى لو فيه Frontend',
+        'معيار التسليم: API شغال وموثّق وجاهز لاختبار فاطمة على Postman',
+      ].join(' | ')
+    : [
+        'المطلوب: دعم Backend عند الحاجة فقط',
+        'المخرجات: أي تعديل API تطلبه منى أثناء الربط',
+        'الاعتماديات: حسب طلب Frontend',
+        'معيار التسليم: مفيش بلوكار من ناحية الـ API',
+      ].join(' | ');
+
+  const mona = involveFrontend
+    ? [
+        `المطلوب: تنفيذ واجهة React وربطها بالتاسك (${text})`,
+        'المخرجات: شاشات/مكونات React + ربط API + حالات UI',
+        'الاعتماديات: بعد مواصفات نورة + توفر API من محمود',
+        'معيار التسليم: الموقع شغال وجاهز لتجربة فاطمة على كل أحجام الشاشات',
+      ].join(' | ')
+    : 'غير مطلوب في التاسك الحالي';
+
+  const fatima = involveFrontend
+    ? [
+        `المطلوب: اختبار شامل للتاسك (${text})`,
+        'Backend: Postman لكل endpoint جديد/معدل + تحديث postman/',
+        'Frontend: تجربة الموقع الحقيقي على 375 و390 و768 و1280 و1440 مع صور/فيديو',
+        'معيار التسليم: قبول نهائي فقط بعد نجاح كل السيناريوهات والأحجام',
+      ].join(' | ')
+    : [
+        `المطلوب: اختبار Backend للتاسك (${text})`,
+        'المخرجات: نتائج Postman + تحديث collection',
+        'سيناريوهات: نجاح/فشل/صلاحيات/حالات حدية',
+        'معيار التسليم: قبول نهائي أو رفض واضح مع رجوع لمحمود',
+      ].join(' | ');
+
+  return {
+    noura,
+    mahmoud,
+    mona,
+    fatima,
+    needsBackend: involveBackend,
+    needsFrontend: involveFrontend,
+  };
+}
+
+function shortAssignment(detailed) {
+  if (!detailed || detailed === 'غير مطلوب في التاسك الحالي') {
+    return 'غير مطلوب';
+  }
+  return detailed.split(' | ')[0].replace(/^المطلوب:\s*/, '');
 }
 
 function writeInbox(task) {
@@ -280,136 +327,148 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
     ].join('\n'),
   );
 
-  // 2) Adel full distribution plan (formatted notify)
+  const nouraActive = !assignment.noura.startsWith('غير مطلوب');
+  const mahmoudActive = !assignment.mahmoud.startsWith('غير مطلوب');
+  const monaActive = !assignment.mona.startsWith('غير مطلوب');
+
+  // 2) Adel full detailed distribution (formatted notify)
   const planSteps = [];
-  if (assignment.noura !== 'غير مطلوب') {
-    planSteps.push('1) نورة تبدأ تصميم UI/UX والتدفقات');
+  if (nouraActive) planSteps.push('1) نورة تسلم تصميم/مواصفات مفصلة');
+  if (mahmoudActive) {
+    planSteps.push(`${planSteps.length + 1}) محمود ينفّذ Backend حسب التاسك المفصل`);
   }
-  if (assignment.mahmoud !== 'غير مطلوب') {
-    planSteps.push(
-      `${planSteps.length + 1}) محمود ينفّذ/يجهّز جزء الـ Backend API`,
-    );
+  if (monaActive) {
+    planSteps.push(`${planSteps.length + 1}) منى تنفّذ React حسب التاسك المفصل`);
   }
-  if (assignment.mona !== 'غير مطلوب') {
-    planSteps.push(
-      `${planSteps.length + 1}) منى تنفّذ واجهة React وتربطها بالـ API`,
-    );
-  }
-  planSteps.push(
-    `${planSteps.length + 1}) فاطمة تختبر (Postman و/أو الموقع على كل الشاشات)`,
-  );
-  planSteps.push(
-    `${planSteps.length + 1}) لو في ملاحظات: رجوع للإصلاح ثم إعادة اختبار`,
-  );
-  planSteps.push(
-    `${planSteps.length + 1}) بعد القبول: عادل بيقفل التاسك (أو /done)`,
-  );
+  planSteps.push(`${planSteps.length + 1}) فاطمة تختبر بالتفصيل وترفض/تقبل`);
+  planSteps.push(`${planSteps.length + 1}) إصلاحات لو لزم ثم إغلاق بعد القبول`);
 
   notifyEmployee(
     'adel',
     'intake',
     [
       `التاسك: ${text}`,
-      `شرح التاسك: استلمت طلبك من تيليجرام (المرسل: ${from}) وهوزّع الشغل كالتالي`,
+      `شرح التاسك: كمدير مشروع فصلت التاسك ووزّعتها على الفريق (المرسل: ${from})`,
       'البرانش: cursor/backend-dev-475f',
       `taskId: ${id}`,
-      'التوزيع:',
-      `- نورة: ${assignment.noura}`,
-      `- محمود: ${assignment.mahmoud}`,
-      `- منى: ${assignment.mona}`,
-      `- فاطمة: ${assignment.fatima}`,
+      'تاسك نورة المفصلة:',
+      `- ${assignment.noura}`,
+      'تاسك محمود المفصلة:',
+      `- ${assignment.mahmoud}`,
+      'تاسك منى المفصلة:',
+      `- ${assignment.mona}`,
+      'تاسك فاطمة المفصلة:',
+      `- ${assignment.fatima}`,
       'خطة التنفيذ:',
       ...planSteps.map((step) => `- ${step}`),
       'ما هيحصل دلوقتي:',
-      '- هتوصلك تقارير من كل موظف لما يبدأ/يخلص',
-      '- وهيبعت عادل تحديثات متابعة دورية لحد ما التاسك تتقفل',
+      '- كل موظف هيستلم تاسكه المفصل ويبلّغ بتقريره',
+      '- هتوصلك تحديثات مستمرة لحد الإغلاق',
       'معايير القبول:',
-      '- تنفيذ المطلوب حسب التوزيع',
+      '- كل موظف يسلّم حسب معيار التسليم المذكور في تاسكه',
       '- قبول فاطمة النهائي قبل الإغلاق',
-      'الحالة: تم التوزيع — التنفيذ بدأ',
-      'الخطوة الجاية: متابعة تقارير الفريق هنا على الجروب',
+      'الحالة: تم تفصيل التوزيع وإسناد التاسكات',
+      'الخطوة الجاية: بدء التنفيذ حسب التاسكات المفصلة',
     ].join('\n'),
   );
 
-  // 3) Extra plain Arabic summary so the plan is very obvious in-chat
+  // 3) Plain detailed summary in chat
   setTimeout(() => {
     sendMessage(
       chatId,
       [
-        '📌 ملخص توزيع عادل',
-        `التاسك: ${text}`,
+        '📌 توزيع عادل — تاسكات مفصلة',
+        `التاسك العامة: ${text}`,
         `رقم المتابعة: ${id}`,
         '',
-        'مين هيعمل إيه:',
-        `🎨 نورة: ${assignment.noura}`,
-        `🛠️ محمود: ${assignment.mahmoud}`,
-        `⚛️ منى: ${assignment.mona}`,
-        `✅ فاطمة: ${assignment.fatima}`,
+        '🎨 تاسك نورة:',
+        assignment.noura,
+        '',
+        '🛠️ تاسك محمود:',
+        assignment.mahmoud,
+        '',
+        '⚛️ تاسك منى:',
+        assignment.mona,
+        '',
+        '✅ تاسك فاطمة:',
+        assignment.fatima,
         '',
         'إيه اللي هيحصل:',
         ...planSteps,
         '',
-        'هتبعتلك تحديثات طول الوقت هنا.',
         'للمتابعة: /status | للإغلاق: /done',
       ].join('\n'),
     ).catch((error) => console.error('[plan-summary]', error.message));
   }, 1500);
 
-  // 4) Quick follow-up statuses
-  setTimeout(() => {
-    notifyEmployee(
-      'adel',
-      'progress',
-      [
-        `التاسك: ${text}`,
+  // 4) Send each employee their detailed personal task card
+  const personalCards = [];
+  if (nouraActive) {
+    personalCards.push({
+      employee: 'noura',
+      delay: 3500,
+      body: [
+        `المهمة: ${text}`,
         `taskId: ${id}`,
-        'الحالة: التوزيع اتبعتلك — وجاري متابعة التنفيذ مع الفريق',
-        'التوزيع الحالي:',
-        `- نورة: ${assignment.noura}`,
-        `- محمود: ${assignment.mahmoud}`,
-        `- منى: ${assignment.mona}`,
-        `- فاطمة: ${assignment.fatima}`,
-        'الخطوة الجاية: استلام تقارير الموظفين ثم تحديث دوري لحد /done',
+        `تاسك عادل لنورة: ${assignment.noura}`,
+        'ما اتعمل:',
+        '- استلام التاسك المفصل من عادل',
+        'الحالة: جاهزة للبدء حسب التفاصيل',
+        'الخطوة الجاية: تسليم المواصفات لمنى',
       ].join('\n'),
-    );
-  }, 4000);
+    });
+  }
+  if (mahmoudActive) {
+    personalCards.push({
+      employee: 'mahmoud',
+      delay: 5000,
+      body: [
+        `المهمة: ${text}`,
+        `taskId: ${id}`,
+        `تاسك عادل لمحمود: ${assignment.mahmoud}`,
+        'ما اتعمل:',
+        '- استلام التاسك المفصل من عادل',
+        'الحالة: جاهز للبدء حسب التفاصيل',
+        'الخطوة الجاية: التنفيذ ثم تسليم فاطمة',
+      ].join('\n'),
+    });
+  }
+  if (monaActive) {
+    personalCards.push({
+      employee: 'mona',
+      delay: 6500,
+      body: [
+        `المهمة: ${text}`,
+        `taskId: ${id}`,
+        `تاسك عادل لمنى: ${assignment.mona}`,
+        'ما اتعمل:',
+        '- استلام التاسك المفصل من عادل',
+        'الحالة: جاهزة للبدء حسب التفاصيل',
+        'الخطوة الجاية: التنفيذ بعد نورة/محمود ثم فاطمة',
+      ].join('\n'),
+    });
+  }
+  personalCards.push({
+    employee: 'fatima',
+    delay: 8000,
+    body: [
+      `المهمة: ${text}`,
+      `taskId: ${id}`,
+      `تاسك عادل لفاطمة: ${assignment.fatima}`,
+      'ما اتعمل:',
+      '- استلام خطة الاختبار المفصلة من عادل',
+      'الحالة: بانتظار تسليم التنفيذ ثم البدء بالاختبار',
+      'الخطوة الجاية: اختبار مفصل وقبول/رفض',
+    ].join('\n'),
+  });
 
-  if (assignment.needsBackend) {
+  for (const card of personalCards) {
     setTimeout(() => {
-      notifyEmployee(
-        'mahmoud',
-        'progress',
-        [
-          `المهمة: ${text}`,
-          `taskId: ${id}`,
-          'ما اتعمل:',
-          '- استلام التوزيع من عادل',
-          '- بدء التحضير للتنفيذ',
-          'الحالة: قيد التنفيذ / التحضير',
-          'الخطوة الجاية: تنفيذ المطلوب ثم تسليم فاطمة',
-        ].join('\n'),
-      );
-    }, 5000);
+      notifyEmployee(card.employee, 'progress', card.body);
+    }, card.delay);
   }
 
-  if (assignment.needsFrontend || assignment.noura !== 'غير مطلوب') {
-    setTimeout(() => {
-      notifyEmployee(
-        'noura',
-        'progress',
-        [
-          `المهمة: ${text}`,
-          `taskId: ${id}`,
-          'ما اتعمل:',
-          '- استلام طلب التصميم/التدفق من عادل',
-          'الحالة: جاري تجهيز مواصفات UI/UX',
-          'الخطوة الجاية: تسليم منى للتنفيذ',
-        ].join('\n'),
-      );
-    }, 7000);
-  }
-
-  console.log(`[telegram:poll] live task started: ${id}`);
+  console.log(`[telegram:poll] live detailed task started: ${id}`);
 }
 
 async function processUpdate(update) {
@@ -470,11 +529,11 @@ async function heartbeat() {
         `التاسك: ${task.text}`,
         `taskId: ${task.id}`,
         `الحالة: تحديث دوري رقم ${task.tick} — التاسك لسه مفتوحة وبيتتابع`,
-        `شغل نورة: ${task.assignment.noura}`,
-        `شغل محمود: ${task.assignment.mahmoud}`,
-        `شغل منى: ${task.assignment.mona}`,
-        `شغل فاطمة: ${task.assignment.fatima}`,
-        'الخطوة الجاية: الفريق يكمل التنفيذ؛ للإغلاق ابعت /done',
+        `تاسك نورة: ${shortAssignment(task.assignment.noura)}`,
+        `تاسك محمود: ${shortAssignment(task.assignment.mahmoud)}`,
+        `تاسك منى: ${shortAssignment(task.assignment.mona)}`,
+        `تاسك فاطمة: ${shortAssignment(task.assignment.fatima)}`,
+        'الخطوة الجاية: الفريق يكمل التنفيذ حسب التاسكات المفصلة؛ للإغلاق /done',
       ].join('\n'),
     );
   }
