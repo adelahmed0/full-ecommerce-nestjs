@@ -52,4 +52,4 @@ jobs:
           MSG=$(printf 'حدث Git في المشروع\nالنوع: %s\nالبرانش: %s\nبواسطة: %s\nالعنوان: %s\nSHA: %s\nالرابط: %s\n' \
             "$EVENT" "$REF" "$ACTOR" "$TITLE" "$SHA" "$LINK")
 
-          node scripts/telegram-notify.mjs --employee system --type git --message "$MSG"
+          node scripts/telegram-notify.cjs --employee system --type git --message "$MSG"

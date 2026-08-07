@@ -27,7 +27,7 @@ npm run telegram:notify -- --employee adel --type intake --message "تم است�
 أو:
 
 ```bash
-node scripts/telegram-notify.mjs --employee mahmoud --type done --file /tmp/report.txt
+node scripts/telegram-notify.cjs --employee mahmoud --type done --file /tmp/report.txt
 ```
 
 ## 4) سلوك الموظفين
