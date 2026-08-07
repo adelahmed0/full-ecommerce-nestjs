@@ -130,6 +130,34 @@ function writeOpenTasks(tasks) {
   fs.writeFileSync(OPEN_TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf8');
 }
 
+function buildEmployeeBrief({
+  role,
+  goal,
+  steps,
+  outputs,
+  inScope,
+  outOfScope,
+  deps,
+  acceptance,
+  handoff,
+  notes,
+}) {
+  return [
+    `الهدف: ${goal}`,
+    'المطلوب:',
+    ...steps.map((step, index) => `${index + 1}) ${step}`),
+    `المخرجات: ${outputs}`,
+    `النطاق: ${inScope}`,
+    `خارج النطاق: ${outOfScope}`,
+    `الاعتماديات: ${deps}`,
+    'معايير القبول:',
+    ...acceptance.map((item) => `- ${item}`),
+    `معيار التسليم لفاطمة: ${handoff}`,
+    `ملاحظات عادل: ${notes}`,
+    `الدور: ${role}`,
+  ].join('\n');
+}
+
 function analyzeTask(text) {
   const lower = text.toLowerCase();
   const blob = `${lower} ${text}`;
@@ -140,52 +168,138 @@ function analyzeTask(text) {
   const needsDesign = /ui|ux|تصميم|تجربة|شاشات/i.test(blob);
   const involveBackend = needsBackend || (!needsFrontend && !needsDesign);
   const involveFrontend = needsFrontend || needsDesign;
+  const summary = text.length > 120 ? `${text.slice(0, 117)}...` : text;
 
   const noura = involveFrontend
-    ? [
-        `المطلوب: تصميم تجربة المستخدم المتعلقة بـ (${text})`,
-        'المخرجات: تدفقات الشاشات + حالات (تحميل/فارغ/خطأ) + ملاحظات UI لمنى',
-        'الاعتماديات: يبدأ قبل تنفيذ منى',
-        'معيار التسليم: مواصفات واضحة قابلة للتنفيذ بدون غموض',
-      ].join(' | ')
+    ? buildEmployeeBrief({
+        role: 'نورة — UI/UX',
+        goal: `توضيح تجربة المستخدم والتدفقات الخاصة بـ: ${summary}`,
+        steps: [
+          'حلّلي طلب المستخدم وحددي الشاشات/التدفقات المتأثرة',
+          'اكتبي حالات الشاشة: تحميل / فارغ / خطأ / نجاح',
+          'حددي عناصر الواجهة وترتيب التفاعل لمنى',
+          'سلّمي مواصفات قابلة للتنفيذ بدون غموض',
+        ],
+        outputs:
+          'مواصفات شاشات + تدفقات + حالات UI (ملف/تقرير واضح لمنى)',
+        inScope: 'تصميم UX/UI ومواصفات التنفيذ لمنى',
+        outOfScope: 'كتابة كود React أو Backend',
+        deps: 'تبدأ أولًا قبل منى؛ ترجع لعادل لو الطلب ناقص',
+        acceptance: [
+          'كل شاشة لها حالات واضحة',
+          'منى تقدر تنفّذ من غير أسئلة أساسية ناقصة',
+        ],
+        handoff: 'مواصفات جاهزة للمراجعة أثناء اختبار الواجهة',
+        notes: 'ركّزي على وضوح التنفيذ مش الزخرفة',
+      })
     : 'غير مطلوب في التاسك الحالي';
 
   const mahmoud = involveBackend
-    ? [
-        `المطلوب: تنفيذ/تجهيز Backend API الخاصة بـ (${text})`,
-        'المخرجات: endpoints + DTOs/validation + صلاحيات Admin/User حسب الحاجة',
-        'الاعتماديات: يسلّم عقود API لمنى لو فيه Frontend',
-        'معيار التسليم: API شغال وموثّق وجاهز لاختبار فاطمة على Postman',
-      ].join(' | ')
-    : [
-        'المطلوب: دعم Backend عند الحاجة فقط',
-        'المخرجات: أي تعديل API تطلبه منى أثناء الربط',
-        'الاعتماديات: حسب طلب Frontend',
-        'معيار التسليم: مفيش بلوكار من ناحية الـ API',
-      ].join(' | ');
+    ? buildEmployeeBrief({
+        role: 'محمود — Backend NestJS',
+        goal: `تنفيذ طبقة Backend اللازمة لـ: ${summary}`,
+        steps: [
+          'حدّد الـ endpoints/الوحدات المطلوبة من نص التاسك',
+          'نفّذ DTOs + validation + الصلاحيات (Admin/User) حسب الحاجة',
+          'اربط مع الموديولات الحالية في NestJS بدون كسر قائم',
+          'وثّق عقود الـ API لمنى (لو فيه Frontend) وجهّز للاختبار',
+        ],
+        outputs: 'كود NestJS + endpoints شغالة + عقد API واضح',
+        inScope: 'Backend فقط تحت cursor/backend-dev-475f',
+        outOfScope: 'React / تصميم UI',
+        deps: involveFrontend
+          ? 'يسلّم عقود API لمنى؛ فاطمة تختبر بعده على Postman'
+          : 'يسلّم مباشرة لفاطمة على Postman',
+        acceptance: [
+          'كل endpoint المطلوب شغال بالحالات الأساسية',
+          'validation والصلاحيات متغطّية',
+          'مفيش شغل على master',
+        ],
+        handoff: 'API جاهز لـ Postman مع سيناريوهات نجاح/فشل',
+        notes: 'ارجع لمتطلبات docs/1-Requirements-ex.docx لو التاسك جزء منها',
+      })
+    : buildEmployeeBrief({
+        role: 'محمود — دعم Backend',
+        goal: 'دعم الـ API فقط لو ظهر بلوكار أثناء ربط الفرونت',
+        steps: [
+          'استنى طلب منى/عادل لو حصل نقص في الـ API',
+          'عدّل الـ endpoint المطلوب بدون توسيع النطاق',
+        ],
+        outputs: 'أي تعديل API مطلوب لفك البلوكار',
+        inScope: 'إصلاح/تكملة API حسب الطلب',
+        outOfScope: 'بناء فيتشر Backend كاملة غير مطلوبة',
+        deps: 'حسب طلب Frontend أو عادل',
+        acceptance: ['مفيش بلوكار Backend يمنع منى'],
+        handoff: 'التعديلات جاهزة لإعادة اختبار فاطمة',
+        notes: 'دور داعم في التاسك دي',
+      });
 
   const mona = involveFrontend
-    ? [
-        `المطلوب: تنفيذ واجهة React وربطها بالتاسك (${text})`,
-        'المخرجات: شاشات/مكونات React + ربط API + حالات UI',
-        'الاعتماديات: بعد مواصفات نورة + توفر API من محمود',
-        'معيار التسليم: الموقع شغال وجاهز لتجربة فاطمة على كل أحجام الشاشات',
-      ].join(' | ')
+    ? buildEmployeeBrief({
+        role: 'منى — Frontend React',
+        goal: `تنفيذ واجهة React وربطها بـ: ${summary}`,
+        steps: [
+          'استلمي مواصفات نورة قبل البناء',
+          'نفّذي الشاشات/المكونات المطلوبة في React',
+          'اربطي الـ API مع محمود (حالات تحميل/خطأ/نجاح)',
+          'تأكدي من السلوك على Mobile/Tablet/Desktop قبل التسليم',
+        ],
+        outputs: 'شاشات React شغالة + ربط API + حالات UI',
+        inScope: 'Frontend React فقط',
+        outOfScope: 'NestJS Backend أو تغيير تصميم جوهري بدون نورة',
+        deps: 'بعد نورة + توفر API من محمود؛ ثم تسليم لفاطمة',
+        acceptance: [
+          'الواجهة بتنفّذ المطلوب من التاسك',
+          'حالات الخطأ/الفارغ ظاهرة',
+          'جاهزة لتجربة فاطمة على كل الأحجام',
+        ],
+        handoff: 'موقع حقيقي قابل للتجربة على 375/390/768/1280/1440',
+        notes: 'متبدئيش تنفيذ قبل brief عادل المفصل',
+      })
     : 'غير مطلوب في التاسك الحالي';
 
   const fatima = involveFrontend
-    ? [
-        `المطلوب: اختبار شامل للتاسك (${text})`,
-        'Backend: Postman لكل endpoint جديد/معدل + تحديث postman/',
-        'Frontend: تجربة الموقع الحقيقي على 375 و390 و768 و1280 و1440 مع صور/فيديو',
-        'معيار التسليم: قبول نهائي فقط بعد نجاح كل السيناريوهات والأحجام',
-      ].join(' | ')
-    : [
-        `المطلوب: اختبار Backend للتاسك (${text})`,
-        'المخرجات: نتائج Postman + تحديث collection',
-        'سيناريوهات: نجاح/فشل/صلاحيات/حالات حدية',
-        'معيار التسليم: قبول نهائي أو رفض واضح مع رجوع لمحمود',
-      ].join(' | ');
+    ? buildEmployeeBrief({
+        role: 'فاطمة — QA',
+        goal: `اختبار شامل (Backend + Frontend) لـ: ${summary}`,
+        steps: [
+          'بعد تسليم محمود: اختبري كل endpoint على Postman وحدّثي postman/',
+          'بعد تسليم منى: جرّبي الموقع الحقيقي على كل الأحجام الإلزامية',
+          'صوّري/سجّلي أدلة تحت artifacts/qa/ مع الحجم في اسم الملف',
+          'اقبلي أو ارفضي بوضوح مع رجوع للمسؤول',
+        ],
+        outputs: 'نتائج Postman + أدلة شاشات + قرار قبول/رفض',
+        inScope: 'QA فقط — مش تنفيذ فيتشر',
+        outOfScope: 'كتابة كود المنتج إلا لو عادل طلب إصلاح توثيقي بسيط',
+        deps: 'بعد تسليم المسؤولين حسب خطة عادل',
+        acceptance: [
+          'Backend: سيناريوهات نجاح/فشل/صلاحيات متغطّية',
+          'Frontend: نجاح على 375 و390 و768 و1280 و1440',
+          'أي فشل حجم = رفض',
+        ],
+        handoff: 'قبول نهائي هو شرط إغلاق عادل',
+        notes: 'التاسك متتقفلش غير بقبولك',
+      })
+    : buildEmployeeBrief({
+        role: 'فاطمة — QA Backend',
+        goal: `اختبار Backend لـ: ${summary}`,
+        steps: [
+          'اختبري كل endpoint جديد/معدل على Postman',
+          'حدّثي collections في postman/',
+          'غطّي نجاح/فشل/صلاحيات/حالات حدية',
+          'اقبلي أو ارجعي لمحمود برفض واضح',
+        ],
+        outputs: 'نتائج Postman + تحديث collection + قرار نهائي',
+        inScope: 'اختبار Backend',
+        outOfScope: 'اختبار واجهات غير موجودة في التاسك',
+        deps: 'بعد تسليم محمود',
+        acceptance: [
+          'كل سيناريو أساسي متسجل',
+          'القرار واضح: مقبول أو مرفوض مع السبب',
+        ],
+        handoff: 'قبول نهائي قبل إغلاق عادل',
+        notes: 'لو رفضتي: حددي لمحمود إيه يتصليح بالظبط',
+      });
 
   return {
     noura,
@@ -201,7 +315,11 @@ function shortAssignment(detailed) {
   if (!detailed || detailed === 'غير مطلوب في التاسك الحالي') {
     return 'غير مطلوب';
   }
-  return detailed.split(' | ')[0].replace(/^المطلوب:\s*/, '');
+  const goalLine = detailed
+    .split('\n')
+    .find((line) => line.startsWith('الهدف:'));
+  if (goalLine) return goalLine.replace(/^الهدف:\s*/, '').slice(0, 90);
+  return detailed.split('\n')[0].slice(0, 90);
 }
 
 function writeInbox(task) {
@@ -348,24 +466,29 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
     'intake',
     [
       `التاسك: ${text}`,
-      `شرح التاسك: كمدير مشروع فصلت التاسك ووزّعتها على الفريق (المرسل: ${from})`,
+      `شرح التاسك: كمدير مشروع فصلت التاسك brief تنفيذي كامل لكل موظف (المرسل: ${from})`,
       'البرانش: cursor/backend-dev-475f',
       `taskId: ${id}`,
-      'تاسك نورة المفصلة:',
-      `- ${assignment.noura}`,
-      'تاسك محمود المفصلة:',
-      `- ${assignment.mahmoud}`,
-      'تاسك منى المفصلة:',
-      `- ${assignment.mona}`,
-      'تاسك فاطمة المفصلة:',
-      `- ${assignment.fatima}`,
+      '',
+      '========== تاسك نورة المفصلة ==========',
+      assignment.noura,
+      '',
+      '========== تاسك محمود المفصلة ==========',
+      assignment.mahmoud,
+      '',
+      '========== تاسك منى المفصلة ==========',
+      assignment.mona,
+      '',
+      '========== تاسك فاطمة المفصلة ==========',
+      assignment.fatima,
+      '',
       'خطة التنفيذ:',
       ...planSteps.map((step) => `- ${step}`),
       'ما هيحصل دلوقتي:',
-      '- كل موظف هيستلم تاسكه المفصل ويبلّغ بتقريره',
+      '- كل موظف هيستلم تاسكه المفصل (هدف/خطوات/نطاق/معايير قبول) ويبلّغ بتقريره',
       '- هتوصلك تحديثات مستمرة لحد الإغلاق',
       'معايير القبول:',
-      '- كل موظف يسلّم حسب معيار التسليم المذكور في تاسكه',
+      '- كل موظف يسلّم حسب معايير القبول في تاسكه المفصل',
       '- قبول فاطمة النهائي قبل الإغلاق',
       'الحالة: تم تفصيل التوزيع وإسناد التاسكات',
       'الخطوة الجاية: بدء التنفيذ حسب التاسكات المفصلة',
@@ -410,10 +533,11 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
       body: [
         `المهمة: ${text}`,
         `taskId: ${id}`,
-        `تاسك عادل لنورة: ${assignment.noura}`,
+        'تاسك عادل المفصلة لنورة:',
+        assignment.noura,
         'ما اتعمل:',
-        '- استلام التاسك المفصل من عادل',
-        'الحالة: جاهزة للبدء حسب التفاصيل',
+        '- استلام الـ brief المفصل من عادل',
+        'الحالة: جاهزة للبدء حسب الخطوات ومعايير القبول',
         'الخطوة الجاية: تسليم المواصفات لمنى',
       ].join('\n'),
     });
@@ -425,10 +549,11 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
       body: [
         `المهمة: ${text}`,
         `taskId: ${id}`,
-        `تاسك عادل لمحمود: ${assignment.mahmoud}`,
+        'تاسك عادل المفصلة لمحمود:',
+        assignment.mahmoud,
         'ما اتعمل:',
-        '- استلام التاسك المفصل من عادل',
-        'الحالة: جاهز للبدء حسب التفاصيل',
+        '- استلام الـ brief المفصل من عادل',
+        'الحالة: جاهز للبدء حسب الخطوات ومعايير القبول',
         'الخطوة الجاية: التنفيذ ثم تسليم فاطمة',
       ].join('\n'),
     });
@@ -440,10 +565,11 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
       body: [
         `المهمة: ${text}`,
         `taskId: ${id}`,
-        `تاسك عادل لمنى: ${assignment.mona}`,
+        'تاسك عادل المفصلة لمنى:',
+        assignment.mona,
         'ما اتعمل:',
-        '- استلام التاسك المفصل من عادل',
-        'الحالة: جاهزة للبدء حسب التفاصيل',
+        '- استلام الـ brief المفصل من عادل',
+        'الحالة: جاهزة للبدء حسب الخطوات ومعايير القبول',
         'الخطوة الجاية: التنفيذ بعد نورة/محمود ثم فاطمة',
       ].join('\n'),
     });
@@ -454,11 +580,12 @@ async function createAndBroadcastTask({ text, from, chatId, updateId }) {
     body: [
       `المهمة: ${text}`,
       `taskId: ${id}`,
-      `تاسك عادل لفاطمة: ${assignment.fatima}`,
+      'تاسك عادل المفصلة لفاطمة:',
+      assignment.fatima,
       'ما اتعمل:',
       '- استلام خطة الاختبار المفصلة من عادل',
       'الحالة: بانتظار تسليم التنفيذ ثم البدء بالاختبار',
-      'الخطوة الجاية: اختبار مفصل وقبول/رفض',
+      'الخطوة الجاية: اختبار حسب معايير القبول وقبول/رفض',
     ].join('\n'),
   });
 
