@@ -19,7 +19,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "telegram:notify": "node scripts/telegram-notify.cjs",
+    "telegram:poll": "node scripts/telegram-poll.cjs",
+    "telegram:set-webhook": "node scripts/telegram-set-webhook.cjs",
+    "telegram:delete-webhook": "node scripts/telegram-set-webhook.cjs delete"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.7",
