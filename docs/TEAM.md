@@ -2,40 +2,44 @@
 
 ## الملخص
 
-تيم سوفت وير كـ **AI Agents** بأسماء عربية.  
-مدير المشروع: **عادل**.  
-الشغل على `cursor/backend-dev-475f` — **مش على `master`**.  
-كل موظف يبعت تقريره على جروب التيليجرام بنفسه.
+تيم AI Agents بأسماء عربية ومديرهم **عادل**.  
+الشغل على `cursor/backend-dev-475f` — مش على `master`.  
+كل موظف يبعت تقريره تيليجرام بنفسه.  
+**التيم يشتغل مع بعض لحد ما فاطمة تقبل التاسك.**
 
 ## الموظفون
 
 | Agent | الاسم | الدور | ماذا يفعل |
 |-------|------|--------|-----------|
-| `/adel` | عادل | مدير المشروع | يستلم التاسك، يشرحه، يحدد شغل كل واحد، يتابع، يبعت تقرير |
-| `/noura` | نورة | UI/UX | تصمم التدفقات والشاشات وتسلم مواصفات لمنى |
-| `/mahmoud` | محمود | Backend (NestJS) | ينفّذ الـ APIs بعد توزيع عادل |
-| `/mona` | منى | Frontend (React) | تنفّذ واجهات React بعد توزيع عادل ومواصفات نورة |
-| `/fatima` | فاطمة | QA / Postman | تختبر، تحدّث `postman/`، تقرير قبول/رفض |
+| `/adel` | عادل | مدير المشروع | يشرح ويوزّع ويتابع لحد الإغلاق |
+| `/noura` | نورة | UI/UX | تصميم ومواصفات |
+| `/mahmoud` | محمود | Backend | NestJS APIs |
+| `/mona` | منى | Frontend React | واجهات React |
+| `/fatima` | فاطمة | QA | Postman للباك + تجربة الموقع للفرونت بصور/فيديو |
+
+## اختبار فاطمة
+
+| النطاق | الطريقة | الأدلة |
+|--------|---------|--------|
+| Backend | Postman | `postman/` + نتائج status codes |
+| Frontend | تجربة الموقع الحقيقي | صور/فيديو في `artifacts/qa/` |
+| لو فشل | رفض + رجوع للمسؤول | إعادة اختبار بعد الإصلاح |
 
 ## عادل يحدد التاسكات هكذا
 
 ```text
 التاسك: ...
 شرح التاسك: ...
-البرانش: cursor/...-475f (من cursor/backend-dev-475f)
+البرانش: cursor/...-475f
 شغل نورة: ...
 شغل محمود: ...
 شغل منى: ...
-شغل فاطمة: ...
+شغل فاطمة: Postman للباك و/أو تجربة الموقع للفرونت مع صور/فيديو
 معايير القبول:
 - ...
+- قبول فاطمة النهائي مطلوب قبل الإغلاق
 الحالة: بانتظار التنفيذ
-الخطوة الجاية: /noura أو /mahmoud أو /mona ...
-```
-
-ثم يبعت التقرير تيليجرام:
-```bash
-npm run telegram:notify -- --employee adel --type intake --file /tmp/adel-report.txt
+الخطوة الجاية: ...
 ```
 
 ## تقارير تيليجرام
@@ -50,12 +54,10 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/adel-report
 
 ## الملفات
 
-- `.cursor/agents/adel.md`
-- `.cursor/agents/noura.md`
-- `.cursor/agents/mahmoud.md`
-- `.cursor/agents/mona.md`
-- `.cursor/agents/fatima.md`
+- `.cursor/agents/*.md`
 - `AGENTS.md`
 - `docs/TELEGRAM.md`
+- `postman/`
+- `artifacts/qa/`
 
-> المرجع التقني: `docs/1-Requirements-ex.docx`
+> المرجع: `docs/1-Requirements-ex.docx`

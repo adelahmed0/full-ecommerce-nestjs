@@ -83,7 +83,11 @@ function employeeMeta(employee) {
     noura: { name: 'نورة', role: 'مصممة UI/UX', emoji: '🎨' },
     mahmoud: { name: 'محمود', role: 'مطور Backend', emoji: '🛠️' },
     mona: { name: 'منى', role: 'مطورة Frontend React', emoji: '⚛️' },
-    fatima: { name: 'فاطمة', role: 'مهندسة جودة / Postman', emoji: '✅' },
+    fatima: {
+      name: 'فاطمة',
+      role: 'جودة — Postman + تجربة الموقع',
+      emoji: '✅',
+    },
     system: { name: 'النظام', role: 'تحديثات Git', emoji: '⚙️' },
   };
   return map[employee] || { name: employee, role: 'موظف', emoji: '👤' };

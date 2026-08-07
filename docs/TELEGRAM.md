@@ -56,7 +56,7 @@ npm run telegram:notify -- --employee adel --type intake --file /tmp/report.txt
 | نورة | `noura` | `progress` / `done` |
 | محمود | `mahmoud` | `progress` / `done` |
 | منى | `mona` | `progress` / `done` |
-| فاطمة | `fatima` | `qa` |
+| فاطمة | `fatima` | `qa` (Postman + تجربة الموقع/صور/فيديو) |
 | GitHub | `system` | `git` |
 
 الرسالة على تيليجرام بتطلع مقسّمة بعناوين وأيقونات تلقائيًا.
