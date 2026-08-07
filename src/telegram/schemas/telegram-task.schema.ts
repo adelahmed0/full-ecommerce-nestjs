@@ -11,8 +11,20 @@ export enum TelegramTaskStatus {
   DONE = 'done',
 }
 
+export enum TelegramMessageKind {
+  TASK = 'task',
+  INSTRUCTION = 'instruction',
+}
+
 @Schema({ timestamps: true })
 export class TelegramTask {
+  @Prop({
+    required: true,
+    enum: Object.values(TelegramMessageKind),
+    default: TelegramMessageKind.TASK,
+  })
+  kind: TelegramMessageKind;
+
   @Prop({ required: true, trim: true })
   text: string;
 

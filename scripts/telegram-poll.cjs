@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /**
- * Live Telegram task receiver + continuous status updates.
+ * Live Telegram receiver for instructions + tasks + continuous status updates.
  *
  * npm run telegram:poll
  *
- * - Receives tasks from the group
- * - Sends Adel intake immediately (formatted)
- * - Keeps sending progress updates until the task is closed
+ * - Receives instructions and tasks from the group
+ * - Instructions: Adel acknowledges and explains team impact (no work cycle)
+ * - Tasks: Adel details who does what (no execution), then progress until closed
  * - Commands:
- *   /status  -> open tasks
- *   /done    -> close latest task
+ *   /status         -> open tasks + recent instructions
+ *   /instructions   -> recent instructions
+ *   /done           -> close latest task
  *   /done <id>
+ *   /task ...       -> force treat as task
+ *   /instruction ...-> force treat as instruction
  */
 
 const fs = require('node:fs');
@@ -20,6 +23,7 @@ const { spawnSync } = require('node:child_process');
 
 const INBOX_DIR = path.join(process.cwd(), 'telegram-inbox');
 const OPEN_TASKS_FILE = path.join(INBOX_DIR, 'open-tasks.json');
+const INSTRUCTIONS_FILE = path.join(INBOX_DIR, 'instructions.json');
 const OFFSET_FILE = path.join(INBOX_DIR, '.offset');
 const STATUS_EVERY_MS = Number(process.env.TELEGRAM_STATUS_EVERY_MS || 45000);
 
@@ -128,6 +132,149 @@ function readOpenTasks() {
 function writeOpenTasks(tasks) {
   fs.mkdirSync(INBOX_DIR, { recursive: true });
   fs.writeFileSync(OPEN_TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf8');
+}
+
+function readInstructions() {
+  if (!fs.existsSync(INSTRUCTIONS_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(INSTRUCTIONS_FILE, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+
+function writeInstructions(items) {
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
+  fs.writeFileSync(INSTRUCTIONS_FILE, JSON.stringify(items, null, 2), 'utf8');
+}
+
+function normalizeIncomingText(raw) {
+  return String(raw || '')
+    .replace(/@\w+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Classify user message as instruction or task.
+ * Explicit prefixes/commands win; otherwise heuristics.
+ */
+function classifyMessage(rawText) {
+  const original = String(rawText || '').trim();
+  let text = normalizeIncomingText(original);
+  let forced = null;
+
+  const commandMatch = text.match(
+    /^\/(task|تاسك|instruction|تعليمة|تعليمات)(?:@\w+)?(?:\s+([\s\S]*))?$/i,
+  );
+  if (commandMatch) {
+    const cmd = commandMatch[1].toLowerCase();
+    forced =
+      cmd === 'task' || cmd === 'تاسك' ? 'task' : 'instruction';
+    text = (commandMatch[2] || '').trim();
+  }
+
+  const prefixMatch = text.match(
+    /^(تعليمة|تعليمات|instruction|تاسك|task)\s*[:：\-]\s*([\s\S]+)$/i,
+  );
+  if (!forced && prefixMatch) {
+    const label = prefixMatch[1].toLowerCase();
+    forced =
+      label === 'تاسك' || label === 'task' ? 'task' : 'instruction';
+    text = prefixMatch[2].trim();
+  }
+
+  if (!text) {
+    return {
+      kind: forced || 'instruction',
+      text: original,
+      emptyBody: true,
+    };
+  }
+
+  if (forced) {
+    return { kind: forced, text, emptyBody: false };
+  }
+
+  const instructionHints =
+    /تعليمة|تعليمات|قاعدة|ممنوع|من دلوقتي|خلي |خليه|متعملش|متعتمش|متشتغل|أوامر|سلوك|طريقة الشغل|سياسة|always|never|don't|do not|policy|process/i;
+  const taskHints =
+    /crud|api|endpoint|nestjs|mongo|postman|react|frontend|backend|شاشة|واجهة|صفحة|موديل|module|ضيف|أضف|نفّذ|نفذ|اعمل|اعملي|implement|feature|brand|categor|product|coupon|cart|order|review|supplier|tax/i;
+
+  const looksInstruction = instructionHints.test(text);
+  const looksTask = taskHints.test(text);
+
+  if (looksInstruction && !looksTask) {
+    return { kind: 'instruction', text, emptyBody: false };
+  }
+  if (looksTask && !looksInstruction) {
+    return { kind: 'task', text, emptyBody: false };
+  }
+  if (looksInstruction && looksTask) {
+    // Mixed: prefer instruction for process wording, else task.
+    if (/قاعدة|ممنوع|من دلوقتي|تعليمة|تعليمات|خلي عادل|متعملش/.test(text)) {
+      return { kind: 'instruction', text, emptyBody: false };
+    }
+    return { kind: 'task', text, emptyBody: false };
+  }
+
+  // Default: accept as instruction (not everything must be a task).
+  return { kind: 'instruction', text, emptyBody: false };
+}
+
+function analyzeInstruction(text) {
+  const lower = `${text}`.toLowerCase();
+  const touchesAdel = /عادل|مدير|توزيع|تفصيل|pm/i.test(text);
+  const touchesNoura = /نورة|ui|ux|تصميم/i.test(lower);
+  const touchesMahmoud = /محمود|backend|nestjs|api|باك/i.test(lower);
+  const touchesMona = /منى|mona|react|frontend|فرونت/i.test(lower);
+  const touchesFatima = /فاطمة|qa|اختبار|postman/i.test(lower);
+  const touchesAll =
+    /الجميع|كل التيم|الفريق|الجماعة|كل واحد|التيم كله/i.test(text);
+
+  const affected = [];
+  if (touchesAll || (!touchesNoura && !touchesMahmoud && !touchesMona && !touchesFatima && !touchesAdel)) {
+    affected.push('كل الفريق');
+  } else {
+    if (touchesAdel) affected.push('عادل');
+    if (touchesNoura) affected.push('نورة');
+    if (touchesMahmoud) affected.push('محمود');
+    if (touchesMona) affected.push('منى');
+    if (touchesFatima) affected.push('فاطمة');
+  }
+
+  return {
+    affected,
+    meaning: `اعتماد التعليمة كقاعدة شغل: ${text}`,
+    action:
+      'تسجيل التعليمة وتطبيقها على الشغل الجاي — من غير فتح دورة تاسك إلا لو طلبت تاسك صراحة',
+  };
+}
+
+function writeInstructionInbox(item) {
+  const content = [
+    'النوع: تعليمة',
+    `التعليمة: ${item.text}`,
+    `شرح عادل: ${item.analysis.meaning}`,
+    `المتأثرون: ${item.analysis.affected.join('، ')}`,
+    `الإجراء: ${item.analysis.action}`,
+    'البرانش: cursor/backend-dev-475f',
+    `المرسل: ${item.from}`,
+    `chatId: ${item.chatId}`,
+    `instructionId: ${item.id}`,
+    `الوقت: ${item.createdAt}`,
+    'الحالة: تم استلام التعليمة وتسجيلها',
+    'الخطوة الجاية: تطبيق التعليمة على الرسائل/التاسكات الجاية',
+    '',
+  ].join('\n');
+  fs.mkdirSync(INBOX_DIR, { recursive: true });
+  fs.writeFileSync(
+    path.join(INBOX_DIR, 'latest-instruction.txt'),
+    content,
+    'utf8',
+  );
+  fs.writeFileSync(path.join(INBOX_DIR, 'latest-message.txt'), content, 'utf8');
+  fs.writeFileSync(path.join(INBOX_DIR, `${item.id}.txt`), content, 'utf8');
 }
 
 function buildEmployeeBrief({
@@ -339,9 +486,11 @@ function writeInbox(task) {
     `الخطوة الجاية: ${task.nextStep}`,
     '',
   ].join('\n');
+  const withKind = [`النوع: تاسك`, content].join('\n');
   fs.mkdirSync(INBOX_DIR, { recursive: true });
-  fs.writeFileSync(path.join(INBOX_DIR, 'latest-task.txt'), content, 'utf8');
-  fs.writeFileSync(path.join(INBOX_DIR, `${task.id}.txt`), content, 'utf8');
+  fs.writeFileSync(path.join(INBOX_DIR, 'latest-task.txt'), withKind, 'utf8');
+  fs.writeFileSync(path.join(INBOX_DIR, 'latest-message.txt'), withKind, 'utf8');
+  fs.writeFileSync(path.join(INBOX_DIR, `${task.id}.txt`), withKind, 'utf8');
 }
 
 function shouldIgnore(text, fromIsBot, chatId) {
@@ -356,25 +505,152 @@ function shouldIgnore(text, fromIsBot, chatId) {
     return true;
   if (text.startsWith('🎨') || text.startsWith('⚛️') || text.startsWith('📥'))
     return true;
-  if (text.startsWith('/status') || text.startsWith('/done')) return false;
+  if (text.startsWith('📋') || text.startsWith('📌') || text.startsWith('🟢'))
+    return true;
+  if (text.startsWith('📍')) return true;
+  if (
+    text.startsWith('/status') ||
+    text.startsWith('/done') ||
+    text.startsWith('/instructions') ||
+    text.startsWith('/task') ||
+    text.startsWith('/instruction') ||
+    text.startsWith('/تاسك') ||
+    text.startsWith('/تعليمة')
+  ) {
+    return false;
+  }
   return false;
 }
 
-async function sendStatusDigest(chatId, tasks) {
+async function sendStatusDigest(chatId) {
+  const tasks = readOpenTasks();
+  const instructions = readInstructions().slice(0, 5);
+  const lines = ['📍 حالة الوارد من تيليجرام', ''];
+
   if (!tasks.length) {
-    await sendMessage(chatId, '📍 مفيش تاسكات مفتوحة حاليًا.');
+    lines.push('تاسكات مفتوحة: لا يوجد');
+  } else {
+    lines.push('تاسكات مفتوحة:');
+    for (const task of tasks) {
+      lines.push(`• ${task.id}`);
+      lines.push(`  التاسك: ${task.text.slice(0, 80)}`);
+      lines.push(`  الحالة: ${task.status}`);
+      lines.push(`  التالي: ${task.nextStep}`);
+      lines.push('');
+    }
+    lines.push('اقفل تاسك: /done أو /done <id>');
+  }
+
+  lines.push('');
+  if (!instructions.length) {
+    lines.push('آخر تعليمات: لا يوجد');
+  } else {
+    lines.push('آخر تعليمات:');
+    for (const item of instructions) {
+      lines.push(`• ${item.id}`);
+      lines.push(`  ${item.text.slice(0, 90)}`);
+      lines.push(`  المتأثرون: ${(item.analysis?.affected || []).join('، ')}`);
+      lines.push('');
+    }
+  }
+
+  lines.push('ابعت تعليمة عادي أو: تعليمة: ... | تاسك: ...');
+  lines.push('/instructions — كل التعليمات الأخيرة');
+  await sendMessage(chatId, lines.join('\n'));
+}
+
+async function sendInstructionsDigest(chatId) {
+  const instructions = readInstructions().slice(0, 15);
+  if (!instructions.length) {
+    await sendMessage(chatId, '📌 مفيش تعليمات مسجّلة لسه. ابعت أي تعليمة عادي.');
     return;
   }
-  const lines = ['📍 التاسكات المفتوحة الآن:', ''];
-  for (const task of tasks) {
-    lines.push(`• ${task.id}`);
-    lines.push(`  التاسك: ${task.text.slice(0, 80)}`);
-    lines.push(`  الحالة: ${task.status}`);
-    lines.push(`  التالي: ${task.nextStep}`);
+  const lines = ['📌 التعليمات المسجّلة:', ''];
+  for (const item of instructions) {
+    lines.push(`• ${item.id}`);
+    lines.push(`  ${item.text}`);
+    lines.push(`  المتأثرون: ${(item.analysis?.affected || []).join('، ')}`);
+    lines.push(`  الوقت: ${item.createdAt}`);
     lines.push('');
   }
-  lines.push('اقفل تاسك: /done أو /done <id>');
   await sendMessage(chatId, lines.join('\n'));
+}
+
+async function createAndBroadcastInstruction({ text, from, chatId, updateId }) {
+  const id = `ins-${Date.now()}`;
+  const analysis = analyzeInstruction(text);
+  const item = {
+    id,
+    kind: 'instruction',
+    text,
+    from,
+    chatId: String(chatId),
+    updateId,
+    createdAt: new Date().toISOString(),
+    status: 'مسجّلة',
+    analysis,
+  };
+
+  writeInstructionInbox(item);
+  const all = readInstructions();
+  all.unshift(item);
+  writeInstructions(all.slice(0, 50));
+
+  await sendMessage(
+    chatId,
+    [
+      '📥 تم استلام التعليمة',
+      `رقم المتابعة: ${id}`,
+      '',
+      'عادل هيسجّلها ويوضّح تأثيرها على الفريق — من غير فتح تاسك.',
+    ].join('\n'),
+  );
+
+  notifyEmployee(
+    'adel',
+    'intake',
+    [
+      `النوع: تعليمة (مش تاسك)`,
+      `التعليمة: ${text}`,
+      `شرح التعليمة: ${analysis.meaning}`,
+      `المرسل: ${from}`,
+      'البرانش: cursor/backend-dev-475f',
+      `instructionId: ${id}`,
+      '',
+      `مين هيتأثر: ${analysis.affected.join('، ')}`,
+      `الإجراء: ${analysis.action}`,
+      '',
+      'دور عادل الآن:',
+      '- تسجيل التعليمة وشرحها للفريق فقط',
+      '- مفيش تنفيذ كود ومفيش فتح دورة تاسك',
+      'ما هيحصل بعد كده:',
+      '- أي تاسك جاية تلتزم بالتعليمة دي',
+      '- لو حابب تفتح شغل تنفيذي ابعت: تاسك: ...',
+      'الحالة: تم استلام وتسجيل التعليمة',
+      'الخطوة الجاية: تطبيق التعليمة على الشغل الجاي',
+    ].join('\n'),
+  );
+
+  setTimeout(() => {
+    sendMessage(
+      chatId,
+      [
+        '📌 رد عادل على التعليمة',
+        `التعليمة: ${text}`,
+        `رقم المتابعة: ${id}`,
+        '',
+        `فهمت إنها تعليمة/قاعدة شغل.`,
+        `المتأثرون: ${analysis.affected.join('، ')}`,
+        `هتتعمل إزاي: ${analysis.action}`,
+        '',
+        'دي مش تاسك — مفيش توزيع تنفيذ ولا متابعة /done.',
+        'لو عايز تاسك شغل بعد كده: تاسك: وصف الشغل',
+        'عرض التعليمات: /instructions | الحالة: /status',
+      ].join('\n'),
+    ).catch((error) => console.error('[instruction-summary]', error.message));
+  }, 1200);
+
+  console.log(`[telegram:poll] instruction recorded: ${id}`);
 }
 
 async function closeTask(chatId, taskId) {
@@ -623,9 +899,13 @@ async function processUpdate(update) {
   const fromIsBot = Boolean(message.from?.is_bot);
   if (shouldIgnore(text, fromIsBot, chatId) && !text.startsWith('/')) return;
 
-  // Commands
+  // Commands that are not message intake
   if (text === '/status' || text.startsWith('/status@')) {
-    await sendStatusDigest(chatId, readOpenTasks());
+    await sendStatusDigest(chatId);
+    return;
+  }
+  if (text === '/instructions' || text.startsWith('/instructions@')) {
+    await sendInstructionsDigest(chatId);
     return;
   }
   if (text === '/done' || text.startsWith('/done ') || text.startsWith('/done@')) {
@@ -641,10 +921,36 @@ async function processUpdate(update) {
     .filter(Boolean)
     .join(' ')
     .trim();
+  const sender = from || message.from?.username || 'unknown';
+  const classified = classifyMessage(text);
+
+  if (classified.emptyBody) {
+    await sendMessage(
+      chatId,
+      [
+        'اكتب محتوى بعد الأمر.',
+        'مثال تعليمة: /instruction خلي التقارير بالعربي',
+        'أو: تعليمة: ممنوع الشغل على master',
+        'مثال تاسك: /task CRUD للـ Brand',
+        'أو: تاسك: CRUD للـ Brand',
+      ].join('\n'),
+    );
+    return;
+  }
+
+  if (classified.kind === 'instruction') {
+    await createAndBroadcastInstruction({
+      text: classified.text,
+      from: sender,
+      chatId,
+      updateId: update.update_id,
+    });
+    return;
+  }
 
   await createAndBroadcastTask({
-    text,
-    from: from || message.from?.username || 'unknown',
+    text: classified.text,
+    from: sender,
     chatId,
     updateId: update.update_id,
   });
@@ -700,11 +1006,19 @@ async function main() {
   await sendMessage(
     process.env.TELEGRAM_CHAT_ID,
     [
-      '🟢 نظام التحديثات المستمرة شغال',
+      '🟢 نظام الاستقبال شغال',
       '',
-      'ابعت أي تاسك هنا وهتوصلك تحديثات طول ما التاسك مفتوحة.',
+      'ابعت تعليمات أو تاسكات عادي.',
+      'تعليمة: قاعدة شغل (بيتسجل — من غير دورة تنفيذ)',
+      'تاسك: شغل للتنفيذ (عادل يفصّل مين يعمل إيه)',
+      '',
+      'أمثلة:',
+      'تعليمة: عادل يفصّل بس ومينفذش',
+      'تاسك: CRUD للـ Brand',
+      '',
       'الأوامر:',
-      '/status — عرض التاسكات المفتوحة',
+      '/status — التاسكات + آخر تعليمات',
+      '/instructions — التعليمات المسجّلة',
       '/done — إغلاق آخر تاسك',
     ].join('\n'),
   );
