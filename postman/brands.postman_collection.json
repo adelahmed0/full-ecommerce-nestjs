@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "Brands API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "فاطمة — مجموعة اختبار Brand CRUD"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api" },
+    { "key": "adminToken", "value": "" },
+    { "key": "userToken", "value": "" },
+    { "key": "brandId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create Brand (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Nike\",\n  \"image\": \"https://example.com/nike.png\"\n}"
+        },
+        "url": "{{baseUrl}}/brands"
+      }
+    },
+    {
+      "name": "Get Brands (Admin/User)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": "{{baseUrl}}/brands?page=1&per_page=10"
+      }
+    },
+    {
+      "name": "Get Brand By Id",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": "{{baseUrl}}/brands/{{brandId}}"
+      }
+    },
+    {
+      "name": "Update Brand (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Nike Updated\"\n}"
+        },
+        "url": "{{baseUrl}}/brands/{{brandId}}"
+      }
+    },
+    {
+      "name": "Delete Brand (Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": "{{baseUrl}}/brands/{{brandId}}"
+      }
+    }
+  ]
+}

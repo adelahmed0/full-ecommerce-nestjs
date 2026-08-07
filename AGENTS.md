@@ -12,9 +12,10 @@
 3. يخلّص شغله حسب دوره.
 4. يسلّم **تقرير** في آخر الرد (مش ملخص تقني جاف فقط).
 5. يحدّد الحالة والخطوة الجاية ومين المسؤول بعدها.
-6. **يبعت التقرير فورًا لجروب التيليجرام** عبر:
-   `npm run telegram:notify -- --employee <adel|mahmoud|fatima> --type <intake|done|qa|close> --message "..."`
+6. **يبعت التقرير فورًا لجروب التيليجرام بنفسه** — كل موظف مسؤول عن إرسال تقريره، مش حد تاني:
+   `npm run telegram:notify -- --employee <adel|mahmoud|fatima> --type <intake|done|qa|close> --file /tmp/report.txt`
    التفاصيل في `docs/TELEGRAM.md`.
+   ممنوع تخلص المهمة بدون إرسال التقرير على تيليجرام.
 
 قوالب التقارير موجودة في ملفات كل موظف تحت `.cursor/agents/`.
 
