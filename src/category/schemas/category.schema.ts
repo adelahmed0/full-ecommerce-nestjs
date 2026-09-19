@@ -9,6 +9,7 @@ export class Category {
   @Prop({
     required: true,
     type: String,
+    unique: true,
     trim: true,
     minlength: [3, 'Name must be at least 3 characters long'],
     maxlength: [30, 'Name must be at most 30 characters long'],
