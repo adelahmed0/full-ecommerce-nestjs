@@ -1,0 +1,33 @@
+---
+description: API success/error envelope and ApiMessage usage
+globs: "**/common/**/*.ts,**/*.controller.ts,**/*.service.ts"
+alwaysApply: false
+---
+
+# API Responses
+
+## Success
+
+`TransformResponseInterceptor`:
+
+```json
+{ "statusCode": 200, "message": "…", "data": {} }
+```
+
+- Message: `@ResponseMessage(ApiMessage.*)`
+- Data shape: `@Serialize(SomeDto)`
+- Lists with pages: `buildPaginatedResult('users', items, total, page, per_page)`
+
+## Errors
+
+`AllExceptionsFilter`:
+
+```json
+{ "statusCode": 400, "message": "…", "errors": { "field": "…" } }
+```
+
+## Rules
+
+- Add user-facing strings to `src/common/enums/api-message.enum.ts`
+- Prefer domain keys (`USER_NOT_FOUND`) over ad-hoc English in services
+- Return the entity/null from handlers — never `{ success: true, … }`

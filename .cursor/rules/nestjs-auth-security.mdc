@@ -1,0 +1,27 @@
+---
+description: JWT auth and RBAC patterns used in this repo
+globs: "**/auth/**/*.ts,**/profile/**/*.ts,**/*.controller.ts"
+alwaysApply: false
+---
+
+# Auth & Roles
+
+## Stack (existing)
+
+- Custom JWT `AuthGuard` + `RolesGuard` (not Passport)
+- Payload: `{ id, email, role }`
+- Roles: `UserRole.ADMIN` | `UserRole.USER`
+- `@Roles([...])` via Reflector decorator
+
+## Rules
+
+- `AuthGuard` before `RolesGuard`
+- Signup must not trust client `role` unless an admin-only create path
+- Use `@CurrentUser()` — don’t read `req.user` ad hoc in controllers
+- Extend existing guards/decorators; don’t add a second auth system
+- Never log tokens or reset codes
+
+## Category policy (current)
+
+- Writes: Admin + JWT
+- Reads: public

@@ -1,0 +1,31 @@
+---
+description: Service layer — Mongoose, exceptions, ApiMessage
+globs: "**/*.service.ts"
+alwaysApply: false
+---
+
+# Services
+
+## Rules
+
+- Inject models with `@InjectModel`; use real CRUD — no placeholder strings
+- Throw Nest exceptions with `ApiMessage` (and field `errors` on conflicts)
+- Ids are strings: `findById(id)`, never `findById(+id)`
+- Hash passwords with `bcrypt` cost `10` before save
+- Secrets on schema: `select: false`; use `.select('+password')` when needed
+- Let `AllExceptionsFilter` map Mongoose errors — don’t swallow them
+
+```typescript
+throw new NotFoundException(ApiMessage.USER_NOT_FOUND);
+throw new ConflictException({
+  message: ApiMessage.USER_ALREADY_EXISTS,
+  errors: { email: 'Email is already taken' },
+});
+```
+
+## Avoid
+
+```typescript
+return 'This action updates a #${id} category';
+throw new Error('fail');
+```

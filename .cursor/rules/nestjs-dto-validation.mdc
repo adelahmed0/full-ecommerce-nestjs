@@ -1,0 +1,28 @@
+---
+description: DTO validation and mapped-types conventions
+globs: "**/dto/**/*.ts"
+alwaysApply: false
+---
+
+# DTOs
+
+## Input
+
+- Every body/query uses a class + `class-validator` with explicit `message:`
+- Optional fields: `@IsOptional()` first
+- Updates: `PartialType` / `OmitType` from **`@nestjs/mapped-types` only**
+
+```typescript
+import { PartialType } from '@nestjs/mapped-types'; // ✅
+// import { PartialType } from '@nestjs/swagger';  // ❌
+```
+
+## Output
+
+- Separate response DTOs with `@Expose()`
+- Applied via `@Serialize(ResponseDto)` on the controller
+- Never expose `password`, reset codes, or internal Mongo fields
+
+## Align
+
+Keep create/update DTO constraints in sync with the Mongoose schema (lengths, enums).

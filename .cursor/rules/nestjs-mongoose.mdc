@@ -1,0 +1,29 @@
+---
+description: Mongoose schema conventions for this project
+globs: "**/schemas/**/*.ts"
+alwaysApply: false
+---
+
+# Mongoose
+
+```typescript
+export type CategoryDocument = HydratedDocument<Category>;
+
+@Schema({ timestamps: true })
+export class Category {
+  @Prop({ required: true, type: String, trim: true })
+  name: string;
+}
+
+export const CategorySchema = SchemaFactory.createForClass(Category);
+applyDocumentJsonTransform(CategorySchema);
+```
+
+## Rules
+
+- Register with `MongooseModule.forFeature`
+- Always apply `applyDocumentJsonTransform` (`id` instead of `_id`, drop `__v`)
+- Secrets: `select: false`
+- Unique fields: `unique: true` + handle duplicates in service/filter
+- Optional empties: prefer `default: null`
+- Mongoose only — no TypeORM/Prisma

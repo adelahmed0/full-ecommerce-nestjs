@@ -1,0 +1,52 @@
+---
+description: Core NestJS architecture matching this ecommerce backend
+alwaysApply: true
+---
+
+# Project Architecture
+
+## Layout
+
+Feature modules under `src/<feature>/` (not `src/modules/`):
+
+```
+*.module.ts / *.controller.ts / *.service.ts / dto/ / schemas/
+```
+
+Shared code only in `src/common/` (decorators, filters, interceptors, utils, upload).
+
+## Golden path (copy this)
+
+Canonical examples: `users`, `auth`, `profile`.
+
+1. Validate input with DTOs + global `ValidationPipe`
+2. Business logic in the service; throw Nest HTTP exceptions + `ApiMessage`
+3. Controller: `@Serialize(Dto)` + `@ResponseMessage(ApiMessage.*)`
+4. Response envelope from interceptor: `{ statusCode, message, data }`
+
+## Layers
+
+- **Controller**: HTTP only — no DB, no hashing, no business rules
+- **Service**: persistence + rules; return data for serialization
+- **DTO**: shapes + `class-validator` messages
+- **Schema**: Mongoose only (`@Schema({ timestamps: true })` + `applyDocumentJsonTransform`)
+
+## Naming
+
+- Files: kebab-case (`create-user.dto.ts`, `auth.guard.ts`)
+- Classes: PascalCase + suffix (`UsersService`, `CreateUserDto`)
+- Global prefix: `api` → `/api/...`
+- Mongo ids: **string** ObjectIds — never `+id` / `number`
+
+## Request body
+
+App uses `{ bodyParser: false }` + global multipart interceptor.
+Clients must send **`multipart/form-data`** (Postman: form-data), not raw JSON — unless bootstrap is changed intentionally.
+
+## Do not
+
+- Invent Passport, TypeORM, Prisma, or a second response wrapper
+- Leave stub services returning `'This action…'`
+- Import `PartialType` from `@nestjs/swagger` — use `@nestjs/mapped-types`
+- Wire Swagger until `SwaggerModule` exists in `main.ts`
+- Commit / push / force-push unless the user explicitly asks

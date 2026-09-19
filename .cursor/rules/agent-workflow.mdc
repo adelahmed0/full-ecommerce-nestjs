@@ -1,0 +1,25 @@
+---
+description: Agent workflow — match existing code, no surprise git/push
+alwaysApply: true
+---
+
+# Agent Workflow
+
+## When changing code
+
+- Match existing patterns in `users` / `auth` / `profile` before inventing new ones
+- Prefer small, focused diffs — no drive-by refactors
+- Completing a feature means: schema + DTOs + real service + guards + Serialize + ApiMessage
+- Ask before changing body parsing (form-data ↔ JSON) or public/auth policy
+
+## Git
+
+- Commit **only** when the user explicitly asks
+- Push **only** when the user explicitly asks
+- Never force-push to `master`/`main` unless the user clearly requests it
+- “رجّع / ارجع الكود” means **revert/restore**, not push
+- If Arabic is ambiguous (كوميت / ارفع / ارجع), ask one short clarifying question first
+
+## Category module note
+
+`category` may still be scaffold/stub. When implementing it, upgrade to the users golden path — don’t leave placeholder service methods.
