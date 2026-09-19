@@ -50,7 +50,7 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException(ApiMessage.INVALID_CREDENTIALS);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -59,11 +59,11 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException(ApiMessage.INVALID_CREDENTIALS);
     }
 
     if (!user.active) {
-      throw new UnauthorizedException('Account is inactive');
+      throw new UnauthorizedException(ApiMessage.ACCOUNT_INACTIVE);
     }
 
     return this.buildAuthResponse(user);
@@ -83,12 +83,8 @@ export class AuthService {
         Date.now() - new Date(user.verificationCodeSentAt).getTime();
 
       if (elapsed < RESET_CODE_COOLDOWN_MS) {
-        const waitSeconds = Math.ceil(
-          (RESET_CODE_COOLDOWN_MS - elapsed) / 1000,
-        );
-
         throw new HttpException(
-          `Please wait ${waitSeconds} seconds before requesting another code`,
+          ApiMessage.RESET_CODE_COOLDOWN,
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }

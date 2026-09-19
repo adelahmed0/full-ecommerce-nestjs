@@ -21,8 +21,10 @@ Resource names are **always plural**, never singular.
 
 ## Also plural
 
-- Module folders for collections: prefer plural when creating new resources (`products/`, `orders/`)
-- Paginated result keys: `buildPaginatedResult('users', …)` / `'categories'` — plural collection name
+- Module folders for collections: **plural** (`users/`, `categories/`, `products/`)
+- Module/controller/service class names: plural (`UsersModule`, `CategoriesController`)
+- Schema/entity class can stay singular (`User`, `Category`) — one document shape
+- Paginated result keys: `buildPaginatedResult('users', …)` — plural collection name
 - URL path segments for list/CRUD resources under `/api/...`
 
 ## Allowed singular (non-collection)

@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ProfileModule } from './profile/profile.module';
-import { CategoryModule } from './category/category.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -23,25 +23,39 @@ import { CategoryModule } from './category/category.module';
         uri: configService.getOrThrow<string>('MONGODB_URI'),
       }),
     }),
-    JwtModule.register({
+    JwtModule.registerAsync({
       global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: {
-        expiresIn: process.env.JWT_EXPIRES_IN as JwtSignOptions['expiresIn'],
-      },
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.getOrThrow<string>(
+            'JWT_EXPIRES_IN',
+          ) as JwtSignOptions['expiresIn'],
+        },
+      }),
     }),
     MailModule,
     UsersModule,
     AuthModule,
     ProfileModule,
-    CategoryModule,
+    CategoriesModule,
   ],
   controllers: [],
   providers: [
     {
       // Global multipart/form-data parser (fields + optional files, with size limits).
       provide: APP_INTERCEPTOR,
-      useClass: AnyFilesInterceptor(createUploadMulterOptions()),
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        AnyFilesInterceptor(
+          createUploadMulterOptions({
+            fileSize:
+              Number(configService.get('UPLOAD_MAX_FILE_SIZE_BYTES')) ||
+              5 * 1024 * 1024,
+            files: Number(configService.get('UPLOAD_MAX_FILES')) || 10,
+          }),
+        ),
     },
   ],
 })

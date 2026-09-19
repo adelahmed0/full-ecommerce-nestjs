@@ -20,6 +20,6 @@ alwaysApply: true
 - “رجّع / ارجع الكود” means **revert/restore**, not push
 - If Arabic is ambiguous (كوميت / ارفع / ارجع), ask one short clarifying question first
 
-## Category module note
+## Categories module note
 
-`categories` must follow the users golden path (real service, DTOs, Serialize, ApiMessage). Never leave placeholder service methods. Route must stay plural: `/api/categories`.
+`src/categories/` follows the users golden path. Route: `/api/categories`. Never leave placeholder service methods.

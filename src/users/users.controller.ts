@@ -47,7 +47,7 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles([UserRole.ADMIN, UserRole.USER])
+  @Roles([UserRole.ADMIN])
   @Serialize(UserResponseDto)
   @ResponseMessage(ApiMessage.USER_FETCHED)
   findOne(@Param('id') id: string) {
@@ -65,7 +65,7 @@ export class UsersController {
 
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles([UserRole.ADMIN, UserRole.USER])
+  @Roles([UserRole.ADMIN])
   @Serialize(UserListItemDto)
   @ResponseMessage(ApiMessage.USER_DELETED)
   remove(@Param('id') id: string) {

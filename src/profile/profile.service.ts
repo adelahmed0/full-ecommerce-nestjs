@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ApiMessage } from '../common/enums/api-message.enum';
 import { UsersService } from '../users/users.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -28,15 +29,13 @@ export class ProfileService {
     const { currentPassword, newPassword } = changePasswordDto;
 
     if (currentPassword === newPassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
-      );
+      throw new BadRequestException(ApiMessage.PASSWORD_SAME_AS_CURRENT);
     }
 
     const user = await this.usersService.findByIdWithPassword(userId);
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(ApiMessage.USER_NOT_FOUND);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -46,8 +45,8 @@ export class ProfileService {
 
     if (!isPasswordValid) {
       throw new BadRequestException({
-        message: 'Current password is incorrect',
-        errors: { currentPassword: 'Current password is incorrect' },
+        message: ApiMessage.CURRENT_PASSWORD_INCORRECT,
+        errors: { currentPassword: ApiMessage.CURRENT_PASSWORD_INCORRECT },
       });
     }
 

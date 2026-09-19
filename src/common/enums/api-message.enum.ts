@@ -27,6 +27,11 @@ export enum ApiMessage {
   USER_UPDATED = 'User updated successfully',
   USER_DELETED = 'User deleted successfully',
 
+  INVALID_CREDENTIALS = 'Invalid email or password',
+  ACCOUNT_INACTIVE = 'Account is inactive',
+  PASSWORD_SAME_AS_CURRENT = 'New password must be different from current password',
+  CURRENT_PASSWORD_INCORRECT = 'Current password is incorrect',
+
   CATEGORY_CREATED = 'Category created successfully',
   CATEGORIES_FETCHED = 'Categories fetched successfully',
   CATEGORY_FETCHED = 'Category fetched successfully',
