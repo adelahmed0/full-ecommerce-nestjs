@@ -24,10 +24,11 @@ create(@Body() dto: CreateUserDto) {
 - Thin handlers: one service call
 - Guard order: `AuthGuard` then `RolesGuard`
 - Admin catalog writes: `@Roles([UserRole.ADMIN])`
-- Public storefront reads: unguarded only when intentional (e.g. category GET)
+- Public storefront reads: unguarded only when intentional (e.g. categories GET)
 - Self-service: class-level `@UseGuards(AuthGuard)` + `@CurrentUser()` (profile)
 - Always pair `@Serialize` + `@ResponseMessage` on handlers that return entities
 - Pass Mongo `:id` as `string` — never `+id`
+- `@Controller` path must be **plural** for CRUD resources (`categories`, not `category`)
 
 ## Auth surfaces
 
@@ -36,5 +37,5 @@ create(@Body() dto: CreateUserDto) {
 | `auth/*` | Public |
 | `profile/*` | JWT |
 | `users/*` writes/lists | JWT + roles as on controller |
-| `category` POST/PATCH/DELETE | JWT + ADMIN |
-| `category` GET | Public |
+| `categories` POST/PATCH/DELETE | JWT + ADMIN |
+| `categories` GET | Public |

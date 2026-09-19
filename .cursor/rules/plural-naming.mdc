@@ -1,0 +1,39 @@
+---
+description: Always use plural names for API resources and feature routes
+alwaysApply: true
+---
+
+# Plural Naming (mandatory)
+
+Resource names are **always plural**, never singular.
+
+## HTTP routes
+
+```typescript
+@Controller('users')        // ✅
+@Controller('categories')   // ✅
+@Controller('products')     // ✅
+
+@Controller('user')         // ❌
+@Controller('category')     // ❌
+@Controller('product')      // ❌
+```
+
+## Also plural
+
+- Module folders for collections: prefer plural when creating new resources (`products/`, `orders/`)
+- Paginated result keys: `buildPaginatedResult('users', …)` / `'categories'` — plural collection name
+- URL path segments for list/CRUD resources under `/api/...`
+
+## Allowed singular (non-collection)
+
+These are actions/areas, not resource collections:
+
+- `auth` (signup/signin/…)
+- `profile` (current user self-service)
+
+## When adding a feature
+
+1. Pick a plural English noun for the route
+2. Use that same plural in `@Controller('…')`
+3. Never introduce a new singular CRUD route

@@ -36,6 +36,8 @@ Canonical examples: `users`, `auth`, `profile`.
 - Files: kebab-case (`create-user.dto.ts`, `auth.guard.ts`)
 - Classes: PascalCase + suffix (`UsersService`, `CreateUserDto`)
 - Global prefix: `api` → `/api/...`
+- **Resource routes: always plural** (`users`, `categories`, `products`) — never singular CRUD paths
+- Exceptions (non-collections): `auth`, `profile`
 - Mongo ids: **string** ObjectIds — never `+id` / `number`
 
 ## Request body

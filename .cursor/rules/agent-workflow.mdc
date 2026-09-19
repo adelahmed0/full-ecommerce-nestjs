@@ -22,4 +22,4 @@ alwaysApply: true
 
 ## Category module note
 
-`category` may still be scaffold/stub. When implementing it, upgrade to the users golden path — don’t leave placeholder service methods.
+`categories` must follow the users golden path (real service, DTOs, Serialize, ApiMessage). Never leave placeholder service methods. Route must stay plural: `/api/categories`.

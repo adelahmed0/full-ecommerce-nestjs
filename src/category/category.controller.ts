@@ -20,7 +20,7 @@ import { ResponseMessage } from '../common/decorators/response-message.decorator
 import { Serialize } from '../common/decorators/serialize.decorator';
 import { ApiMessage } from '../common/enums/api-message.enum';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
