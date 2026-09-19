@@ -3,8 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { createUploadMulterOptions } from './common/upload/multer.options';
+import { MultipartFilesInterceptor } from './common/upload/multipart-files.interceptor';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
@@ -44,18 +43,8 @@ import { CategoriesModule } from './categories/categories.module';
   controllers: [],
   providers: [
     {
-      // Global multipart/form-data parser (fields + optional files, with size limits).
       provide: APP_INTERCEPTOR,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) =>
-        AnyFilesInterceptor(
-          createUploadMulterOptions({
-            fileSize:
-              Number(configService.get('UPLOAD_MAX_FILE_SIZE_BYTES')) ||
-              5 * 1024 * 1024,
-            files: Number(configService.get('UPLOAD_MAX_FILES')) || 10,
-          }),
-        ),
+      useClass: MultipartFilesInterceptor,
     },
   ],
 })

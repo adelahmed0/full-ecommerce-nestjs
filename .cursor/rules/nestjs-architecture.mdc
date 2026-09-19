@@ -42,8 +42,11 @@ Canonical examples: `users`, `auth`, `profile`.
 
 ## Request body
 
-App uses `{ bodyParser: false }` + global multipart interceptor.
-Clients must send **`multipart/form-data`** (Postman: form-data), not raw JSON — unless bootstrap is changed intentionally.
+Supports **both**:
+- `application/json` (Postman: Body → raw → JSON) — preferred for most endpoints
+- `multipart/form-data` (Postman: form-data) — for fields + file uploads via `MultipartFilesInterceptor`
+
+Do not set `{ bodyParser: false }` unless intentionally forcing multipart-only.
 
 ## Do not
 
