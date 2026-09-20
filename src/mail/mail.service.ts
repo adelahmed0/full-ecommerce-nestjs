@@ -22,7 +22,10 @@ export class MailService {
         },
       });
     } catch (error) {
-      this.logger.error(`Failed to send reset code to ${email}`, error);
+      this.logger.error(
+        `Failed to send reset code to ${email}`,
+        error instanceof Error ? error.stack : error,
+      );
       throw error instanceof Error ? error : new Error('Failed to send email');
     }
   }

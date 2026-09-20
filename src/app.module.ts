@@ -9,9 +9,6 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ProfileModule } from './profile/profile.module';
 import { CategoriesModule } from './categories/categories.module';
-import { createObserveModule } from '@nestjs/observe';
-
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
@@ -42,11 +39,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AuthModule,
     ProfileModule,
     CategoriesModule,
-    ObserveModule.forRoot({
-      appKey: process.env.OBSERVE_APP_KEY,
-      appSecret: process.env.OBSERVE_APP_SECRET,
-      serviceId: 'full-ecommerce-nestjs',
-    }),
   ],
   controllers: [],
   providers: [
