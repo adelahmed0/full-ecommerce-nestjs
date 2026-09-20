@@ -1,7 +1,7 @@
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Global, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { MailService } from './mail.service';
@@ -19,6 +19,7 @@ function resolveTemplatesDir() {
 @Module({
   imports: [
     MailerModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
