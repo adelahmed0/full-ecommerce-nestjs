@@ -1,14 +1,16 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
+import { AppModule, ObserveInstrument } from './app.module';
 import { validationExceptionFactory } from './common/validation/validation-exception.factory';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
 async function bootstrap() {
   // Default body parser on (JSON + urlencoded). Multipart handled by MultipartFilesInterceptor.
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    instrument: ObserveInstrument,
+  });
   const configService = app.get(ConfigService);
 
   app.setGlobalPrefix('api');
