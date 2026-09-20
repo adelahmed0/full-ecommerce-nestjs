@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util';
-import { UserRole, UserActive, UserGender } from '../enums/user.enum';
+import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util.js';
+import { UserRole, UserActive, UserGender } from '../enums/user.enum.js';
 
 export type UserDocument = HydratedDocument<User>;
 

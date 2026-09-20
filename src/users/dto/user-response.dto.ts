@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
-import { UserActive, UserGender, UserRole } from '../enums/user.enum';
-import { BaseUserIdDto } from './base-user-id.dto';
+import { UserActive, UserGender, UserRole } from '../enums/user.enum.js';
+import { BaseUserIdDto } from './base-user-id.dto.js';
 
 export class UserResponseDto extends BaseUserIdDto {
   @Expose()

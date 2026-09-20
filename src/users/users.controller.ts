@@ -9,19 +9,19 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ResponseMessage } from '../common/decorators/response-message.decorator';
-import { Serialize } from '../common/decorators/serialize.decorator';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from './enums/user.enum';
-import { UserResponseDto } from './dto/user-response.dto';
-import { UserListItemDto } from './dto/user-list-item.dto';
-import { FindUsersQueryDto } from './dto/find-users-query.dto';
+import { UsersService } from './users.service.js';
+import { CreateUserDto } from './dto/create-user.dto.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
+import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
+import { Serialize } from '../common/decorators/serialize.decorator.js';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
+import { UserRole } from './enums/user.enum.js';
+import { UserResponseDto } from './dto/user-response.dto.js';
+import { UserListItemDto } from './dto/user-list-item.dto.js';
+import { FindUsersQueryDto } from './dto/find-users-query.dto.js';
 
 @Controller('users')
 export class UsersController {

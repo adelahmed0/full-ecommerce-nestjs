@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from '../users/users.module';
-import { ProfileController } from './profile.controller';
-import { ProfileService } from './profile.service';
+import { UsersModule } from '../users/users.module.js';
+import { ProfileController } from './profile.controller.js';
+import { ProfileService } from './profile.service.js';
 
 @Module({
   imports: [UsersModule],

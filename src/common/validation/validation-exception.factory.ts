@@ -1,5 +1,5 @@
 import { BadRequestException, ValidationError } from '@nestjs/common';
-import { labelFor } from '../utils/field-label';
+import { labelFor } from '../utils/field-label.js';
 
 const WHITELIST_CONSTRAINT = 'whitelistValidation';
 

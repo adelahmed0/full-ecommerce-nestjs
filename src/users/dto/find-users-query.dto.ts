@@ -5,8 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { UserGender, UserRole } from '../enums/user.enum';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto.js';
+import { UserGender, UserRole } from '../enums/user.enum.js';
 
 export class FindUsersQueryDto extends PaginationQueryDto {
   @IsOptional()

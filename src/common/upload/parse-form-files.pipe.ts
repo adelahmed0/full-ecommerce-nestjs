@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { detectMimeFromBuffer } from './magic-bytes';
+import { detectMimeFromBuffer } from './magic-bytes.js';
 import {
   FormFileFieldRule,
   FormFileFieldsResult,
   UploadedMulterFile,
-} from './upload.types';
+} from './upload.types.js';
 
 function isUploadedMulterFile(value: object): value is UploadedMulterFile {
   return (

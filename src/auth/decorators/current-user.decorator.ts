@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import {
   JwtPayload,
   RequestWithUser,
-} from '../interfaces/jwt-payload.interface';
+} from '../interfaces/jwt-payload.interface.js';
 
 export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): JwtPayload => {

@@ -7,20 +7,20 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiMessage } from '../common/enums/api-message.enum';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomInt } from 'crypto';
-import { MailService } from '../mail/mail.service';
-import { UsersService } from '../users/users.service';
-import { UserRole } from '../users/enums/user.enum';
-import { UserDocument } from '../users/schemas/user.schema';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { MailService } from '../mail/mail.service.js';
+import { UsersService } from '../users/users.service.js';
+import { UserRole } from '../users/enums/user.enum.js';
+import { UserDocument } from '../users/schemas/user.schema.js';
+import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { SignInDto } from './dto/sign-in.dto.js';
+import { SignUpDto } from './dto/sign-up.dto.js';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto.js';
+import { JwtPayload } from './interfaces/jwt-payload.interface.js';
 
 const RESET_CODE_COOLDOWN_MS = 60 * 1000;
 const RESET_CODE_EXPIRES_MS = 10 * 60 * 1000;

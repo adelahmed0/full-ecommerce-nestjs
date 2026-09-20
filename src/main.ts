@@ -1,10 +1,10 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
-import { validationExceptionFactory } from './common/validation/validation-exception.factory';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
+import { AppModule } from './app.module.js';
+import { validationExceptionFactory } from './common/validation/validation-exception.factory.js';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor.js';
 
 async function bootstrap() {
   // Default body parser on (JSON + urlencoded). Multipart handled by MultipartFilesInterceptor.

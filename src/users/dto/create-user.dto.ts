@@ -15,7 +15,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { UserGender, UserRole } from '../enums/user.enum';
+import { UserGender, UserRole } from '../enums/user.enum.js';
 
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Name is required' })

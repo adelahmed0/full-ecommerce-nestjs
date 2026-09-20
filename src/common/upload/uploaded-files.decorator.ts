@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
-import { UploadedMulterFile } from './upload.types';
+import { UploadedMulterFile } from './upload.types.js';
 
 type RequestWithFiles = Request & {
   files?: UploadedMulterFile[] | Record<string, UploadedMulterFile[]>;

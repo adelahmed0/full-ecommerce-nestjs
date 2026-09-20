@@ -8,17 +8,17 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryResponseDto } from './dto/category-response.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '../users/enums/user.enum';
-import { ResponseMessage } from '../common/decorators/response-message.decorator';
-import { Serialize } from '../common/decorators/serialize.decorator';
-import { ApiMessage } from '../common/enums/api-message.enum';
+import { CategoriesService } from './categories.service.js';
+import { CreateCategoryDto } from './dto/create-category.dto.js';
+import { UpdateCategoryDto } from './dto/update-category.dto.js';
+import { CategoryResponseDto } from './dto/category-response.dto.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
+import { UserRole } from '../users/enums/user.enum.js';
+import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
+import { Serialize } from '../common/decorators/serialize.decorator.js';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
 
 @Controller('categories')
 export class CategoriesController {

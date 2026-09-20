@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category, CategoryDocument } from './schemas/category.schema';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { CreateCategoryDto } from './dto/create-category.dto.js';
+import { UpdateCategoryDto } from './dto/update-category.dto.js';
+import { Category, CategoryDocument } from './schemas/category.schema.js';
 
 @Injectable()
 export class CategoriesService {

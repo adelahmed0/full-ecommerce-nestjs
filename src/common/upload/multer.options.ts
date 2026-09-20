@@ -13,6 +13,8 @@ export function createUploadMulterOptions(
   return {
     ...overrides,
     // Default memory storage so magic-byte validation can read file.buffer.
+    // Nest MulterOptions types `storage` as `any`.
+
     storage: overrides.storage ?? memoryStorage(),
     limits: {
       fileSize: limits.fileSize,

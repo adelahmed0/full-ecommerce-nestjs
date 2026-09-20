@@ -3,12 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
-import { MultipartFilesInterceptor } from './common/upload/multipart-files.interceptor';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { MailModule } from './mail/mail.module';
-import { ProfileModule } from './profile/profile.module';
-import { CategoriesModule } from './categories/categories.module';
+import { MultipartFilesInterceptor } from './common/upload/multipart-files.interceptor.js';
+import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { MailModule } from './mail/mail.module.js';
+import { ProfileModule } from './profile/profile.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
 
 @Module({
   imports: [

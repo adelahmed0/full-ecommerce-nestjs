@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import multer from 'multer';
 import { Observable } from 'rxjs';
-import { createUploadMulterOptions } from '../upload/multer.options';
+import { createUploadMulterOptions } from '../upload/multer.options.js';
 
 /**
  * Parses multipart/form-data (fields + files) when the request is multipart.

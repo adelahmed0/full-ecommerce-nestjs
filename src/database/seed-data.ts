@@ -1,4 +1,4 @@
-import { UserGender, UserRole } from '../users/enums/user.enum';
+import { UserGender, UserRole } from '../users/enums/user.enum.js';
 
 export const seedUsers = [
   {

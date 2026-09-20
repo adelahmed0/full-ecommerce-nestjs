@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { ApiMessage } from '../enums/api-message.enum';
+import { ApiMessage } from '../enums/api-message.enum.js';
 
 export const RESPONSE_MESSAGE_KEY = 'responseMessage';
 

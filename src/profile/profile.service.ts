@@ -4,10 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { UsersService } from '../users/users.service';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { UsersService } from '../users/users.service.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
+import { UpdateProfileDto } from './dto/update-profile.dto.js';
 
 @Injectable()
 export class ProfileService {

@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { getModelToken } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { AppModule } from '../app.module';
-import { User } from '../users/schemas/user.schema';
-import { seedUsers } from './seed-data';
+import { AppModule } from '../app.module.js';
+import { User } from '../users/schemas/user.schema.js';
+import { seedUsers } from './seed-data.js';
 
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);

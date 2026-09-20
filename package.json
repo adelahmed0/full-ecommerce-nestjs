@@ -5,32 +5,32 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
-    "seed:clear": "ts-node -r tsconfig-paths/register src/database/clear.ts",
+    "start:prod": "node dist/main.js",
+    "seed": "tsx src/database/seed.ts",
+    "seed:clear": "tsx src/database/clear.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.7",
-    "@nestjs/common": "^12.0.0",
+    "@nestjs/common": "^12.0.3",
     "@nestjs/config": "^12.0.0",
-    "@nestjs/core": "^12.0.0",
+    "@nestjs/core": "^12.0.3",
     "@nestjs/jwt": "^12.0.2",
     "@nestjs/mapped-types": "^12.0.0",
     "@nestjs/mongoose": "^12.0.0",
-    "@nestjs/platform-express": "^12.0.0",
-    "@nestjs/swagger": "^12.0.0",
+    "@nestjs/platform-express": "^12.0.3",
+    "@nestjs/swagger": "^12.0.1",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -44,55 +44,36 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^9.39.5",
-    "@nestjs/cli": "^12.0.0",
-    "@nestjs/schematics": "^12.0.0",
-    "@nestjs/testing": "^12.0.0",
+    "@nestjs/cli": "^12.0.3",
+    "@nestjs/schematics": "^12.0.3",
+    "@nestjs/testing": "^12.0.3",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
-    "@types/jest": "^30.0.0",
     "@types/multer": "^2.2.0",
     "@types/node": "^24.13.6",
     "@types/nodemailer": "^8.0.2",
     "@types/supertest": "^7.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.12.0",
-    "jest": "^30.5.2",
     "prettier": "^3.9.8",
-    "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
-    "ts-jest": "^29.4.0",
-    "ts-loader": "^9.5.4",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.5",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "nodemailer": "$nodemailer"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true,
     "@parcel/watcher@2.6.0": true,
     "unrs-resolver@1.12.2": true,
-    "@scarf/scarf": false
+    "@scarf/scarf": false,
+    "esbuild@0.28.2": true
   }
 }

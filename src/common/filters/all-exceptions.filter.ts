@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
-import { labelFor } from '../utils/field-label';
+import { labelFor } from '../utils/field-label.js';
 
 export interface ErrorResponseBody {
   statusCode: number;

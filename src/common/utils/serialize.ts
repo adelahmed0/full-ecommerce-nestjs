@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { isPaginatedResult } from '../dto/paginated-result';
+import { isPaginatedResult } from '../dto/paginated-result.js';
 
 function toPlain(value: unknown): unknown {
   if (

@@ -8,10 +8,10 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
-import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator';
-import { SERIALIZE_KEY } from '../decorators/serialize.decorator';
-import { ApiMessage } from '../enums/api-message.enum';
-import { serializeToDto } from '../utils/serialize';
+import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator.js';
+import { SERIALIZE_KEY } from '../decorators/serialize.decorator.js';
+import { ApiMessage } from '../enums/api-message.enum.js';
+import { serializeToDto } from '../utils/serialize.js';
 
 export interface SuccessResponseBody<T> {
   statusCode: number;

@@ -6,12 +6,12 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { buildPaginatedResult } from '../common/dto/paginated-result';
-import { CreateUserDto } from './dto/create-user.dto';
-import { FindUsersQueryDto } from './dto/find-users-query.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './schemas/user.schema';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { buildPaginatedResult } from '../common/dto/paginated-result.js';
+import { CreateUserDto } from './dto/create-user.dto.js';
+import { FindUsersQueryDto } from './dto/find-users-query.dto.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
+import { User } from './schemas/user.schema.js';
 
 @Injectable()
 export class UsersService {

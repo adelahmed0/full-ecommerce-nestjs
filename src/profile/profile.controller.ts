@@ -6,16 +6,16 @@ import {
   Patch,
   UseGuards,
 } from '@nestjs/common';
-import { ResponseMessage } from '../common/decorators/response-message.decorator';
-import { Serialize } from '../common/decorators/serialize.decorator';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
-import { UserProfileDto } from '../users/dto/user-profile.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
-import { ProfileService } from './profile.service';
+import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
+import { Serialize } from '../common/decorators/serialize.decorator.js';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface.js';
+import { UserProfileDto } from '../users/dto/user-profile.dto.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
+import { UpdateProfileDto } from './dto/update-profile.dto.js';
+import { ProfileService } from './profile.service.js';
 
 @Controller('profile')
 @UseGuards(AuthGuard)

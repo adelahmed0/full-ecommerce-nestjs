@@ -4,10 +4,10 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { MailService } from './mail.service';
+import { MailService } from './mail.service.js';
 
 function resolveTemplatesDir() {
-  const distTemplates = join(__dirname, 'templates');
+  const distTemplates = join(import.meta.dirname, 'templates');
   if (existsSync(join(distTemplates, 'password-reset.hbs'))) {
     return distTemplates;
   }

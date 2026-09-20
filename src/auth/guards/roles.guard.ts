@@ -5,9 +5,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '../../users/enums/user.enum';
-import { Roles } from '../decorators/roles.decorator';
-import { RequestWithUser } from '../interfaces/jwt-payload.interface';
+import { UserRole } from '../../users/enums/user.enum.js';
+import { Roles } from '../decorators/roles.decorator.js';
+import { RequestWithUser } from '../interfaces/jwt-payload.interface.js';
 
 function matchRoles(requiredRoles: UserRole[], userRole: UserRole): boolean {
   return requiredRoles.includes(userRole);

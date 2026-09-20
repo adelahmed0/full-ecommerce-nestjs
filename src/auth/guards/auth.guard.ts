@@ -9,7 +9,7 @@ import { Request } from 'express';
 import {
   JwtPayload,
   RequestWithUser,
-} from '../interfaces/jwt-payload.interface';
+} from '../interfaces/jwt-payload.interface.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

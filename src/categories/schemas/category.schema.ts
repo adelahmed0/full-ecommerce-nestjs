@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util';
+import { applyDocumentJsonTransform } from '../../common/utils/mongoose-document.util.js';
 
 export type CategoryDocument = HydratedDocument<Category>;
 

@@ -1,14 +1,14 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ResponseMessage } from '../common/decorators/response-message.decorator';
-import { Serialize } from '../common/decorators/serialize.decorator';
-import { ApiMessage } from '../common/enums/api-message.enum';
-import { AuthService } from './auth.service';
-import { AuthResponseDto } from './dto/auth-response.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
+import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
+import { Serialize } from '../common/decorators/serialize.decorator.js';
+import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { AuthService } from './auth.service.js';
+import { AuthResponseDto } from './dto/auth-response.dto.js';
+import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { SignInDto } from './dto/sign-in.dto.js';
+import { SignUpDto } from './dto/sign-up.dto.js';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto.js';
 
 @Controller('auth')
 export class AuthController {

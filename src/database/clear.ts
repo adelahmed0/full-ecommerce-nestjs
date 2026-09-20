@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AppModule } from '../app.module';
-import { User } from '../users/schemas/user.schema';
+import { AppModule } from '../app.module.js';
+import { User } from '../users/schemas/user.schema.js';
 
 async function clear() {
   const app = await NestFactory.createApplicationContext(AppModule);
