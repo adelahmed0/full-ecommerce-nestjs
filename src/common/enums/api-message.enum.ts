@@ -39,4 +39,6 @@ export enum ApiMessage {
   CATEGORY_DELETED = 'Category deleted successfully',
   CATEGORY_NOT_FOUND = 'Category not found',
   CATEGORY_ALREADY_EXISTS = 'Category already exists',
+
+  MULTIPART_FORM_DATA_REQUIRED = 'Content-Type must be multipart/form-data',
 }

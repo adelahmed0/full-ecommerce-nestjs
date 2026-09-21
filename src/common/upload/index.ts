@@ -12,3 +12,4 @@ export {
 } from './uploaded-files.decorator.js';
 export { LocalFileStorageService } from './local-file-storage.service.js';
 export { UploadModule } from './upload.module.js';
+export { MultipartOnlyGuard } from './multipart-only.guard.js';

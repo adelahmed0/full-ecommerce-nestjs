@@ -22,6 +22,7 @@ import { ApiMessage } from '../common/enums/api-message.enum.js';
 import { FormFiles } from '../common/upload/uploaded-files.decorator.js';
 import { IMAGE_MIME_TYPES } from '../common/upload/upload.constants.js';
 import { parseFormFiles } from '../common/upload/parse-form-files.pipe.js';
+import { MultipartOnlyGuard } from '../common/upload/multipart-only.guard.js';
 import type { FormFileFieldsResult } from '../common/upload/upload.types.js';
 
 const categoryImageFiles = parseFormFiles([
@@ -38,7 +39,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, MultipartOnlyGuard)
   @Roles([UserRole.ADMIN])
   @Serialize(CategoryResponseDto)
   @ResponseMessage(ApiMessage.CATEGORY_CREATED)
@@ -64,7 +65,7 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, MultipartOnlyGuard)
   @Roles([UserRole.ADMIN])
   @Serialize(CategoryResponseDto)
   @ResponseMessage(ApiMessage.CATEGORY_UPDATED)
@@ -73,11 +74,7 @@ export class CategoriesController {
     @Body() updateCategoryDto: UpdateCategoryDto,
     @FormFiles(categoryImageFiles) files: FormFileFieldsResult,
   ) {
-    return this.categoriesService.update(
-      id,
-      updateCategoryDto,
-      files.image[0],
-    );
+    return this.categoriesService.update(id, updateCategoryDto, files.image[0]);
   }
 
   @Delete(':id')

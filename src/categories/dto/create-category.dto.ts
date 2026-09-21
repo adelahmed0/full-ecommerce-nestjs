@@ -15,6 +15,7 @@ export class CreateCategoryDto {
   @MaxLength(30, { message: 'Name must be at most 30 characters' })
   name: string;
 
+  /** Optional image URL when not uploading a file (form-data Text field). */
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
     value === '' || value === null ? undefined : value,

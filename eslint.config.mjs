@@ -34,6 +34,8 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+      // Nest HttpException extends Error, but type-aware lint often fails on the chain.
+      '@typescript-eslint/only-throw-error': 'off',
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },

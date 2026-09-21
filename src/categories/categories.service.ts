@@ -42,7 +42,7 @@ export class CategoriesService {
       : (createCategoryDto.image ?? null);
 
     return this.categoryModel.create({
-      ...createCategoryDto,
+      name: createCategoryDto.name,
       image,
     });
   }
@@ -83,13 +83,17 @@ export class CategoriesService {
       throw new NotFoundException(ApiMessage.CATEGORY_NOT_FOUND);
     }
 
-    const patch: UpdateCategoryDto = { ...updateCategoryDto };
+    const patch: { name?: string; image?: string | null } = {
+      ...updateCategoryDto,
+    };
 
     if (imageFile) {
       patch.image = await this.fileStorage.save(
         imageFile,
         CATEGORY_IMAGE_FOLDER,
       );
+      await this.fileStorage.deleteIfLocal(existing.image);
+    } else if (updateCategoryDto.image !== undefined) {
       await this.fileStorage.deleteIfLocal(existing.image);
     }
 
