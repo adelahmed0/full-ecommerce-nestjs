@@ -1,0 +1,49 @@
+---
+description: Every new collection module must include seed + clear data
+alwaysApply: true
+---
+
+# Module Seed (mandatory)
+
+When adding a **new collection module** under `src/<plural>/` (e.g. `products`, `brands`), always ship seed data in the same change.
+
+Skip seed only for non-collection areas (`auth`, `profile`) unless the user asks.
+
+## Checklist (same PR / same task)
+
+1. Add `seedX` array in `src/database/seed-data.ts`
+2. Insert loop in `src/database/seed.ts` (skip if unique key exists)
+3. Delete in `src/database/clear.ts` via `deleteMany`
+4. Use the Mongoose model via `getModelToken(Schema.name)` — same pattern as users/categories
+
+## Patterns
+
+```typescript
+// seed-data.ts
+export const seedProducts = [
+  { name: 'Sample', price: 100, /* … */ },
+];
+
+// seed.ts — after users/categories loops
+for (const item of seedProducts) {
+  const exists = await productModel.exists({ name: item.name }); // unique field
+  if (exists) {
+    console.log(`Skipped product (exists): ${item.name}`);
+    continue;
+  }
+  await productModel.create(item);
+  console.log(`Created product: ${item.name}`);
+}
+
+// clear.ts
+const productsResult = await productModel.deleteMany({});
+console.log(`Deleted ${productsResult.deletedCount} product(s)`);
+```
+
+## Rules
+
+- Seed must be **idempotent** (safe to re-run; skip duplicates)
+- Prefer realistic sample fields that pass DTO/schema validation
+- Images: use external `https://…` URLs in seed data (no file upload in seed scripts)
+- Do not invent a second seed runner — extend `npm run seed` / `npm run seed:clear` only
+- Completing a new CRUD module without seed is **incomplete**

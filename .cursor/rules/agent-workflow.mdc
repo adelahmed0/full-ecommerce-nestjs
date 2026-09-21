@@ -9,7 +9,7 @@ alwaysApply: true
 
 - Match existing patterns in `users` / `auth` / `profile` before inventing new ones
 - Prefer small, focused diffs — no drive-by refactors
-- Completing a feature means: schema + DTOs + real service + guards + Serialize + ApiMessage
+- Completing a feature means: schema + DTOs + real service + guards + Serialize + ApiMessage + **seed/clear entries** (collection modules)
 - Ask before changing body parsing (form-data ↔ JSON) or public/auth policy
 
 ## Git
