@@ -13,6 +13,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
+  // Needed so request protocol/host stay correct behind nginx / reverse proxies.
+  app.set('trust proxy', 1);
+
   const uploadDir = resolve(
     configService.get<string>('UPLOAD_DIR') ?? 'uploads',
   );
@@ -28,7 +31,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(
-    new TransformResponseInterceptor(app.get(Reflector)),
+    new TransformResponseInterceptor(
+      app.get(Reflector),
+      app.get(ConfigService),
+    ),
   );
   app.useGlobalPipes(
     new ValidationPipe({

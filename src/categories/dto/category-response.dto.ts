@@ -1,4 +1,5 @@
 import { Expose, Transform } from 'class-transformer';
+import { PublicAssetUrl } from '../../common/decorators/public-asset-url.decorator.js';
 
 export class CategoryResponseDto {
   @Expose()
@@ -12,6 +13,7 @@ export class CategoryResponseDto {
   name: string;
 
   @Expose()
+  @PublicAssetUrl()
   image: string | null;
 
   @Expose()

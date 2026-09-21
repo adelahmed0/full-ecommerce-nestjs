@@ -5,12 +5,14 @@ import {
   NestInterceptor,
   Type,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
 import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator.js';
 import { SERIALIZE_KEY } from '../decorators/serialize.decorator.js';
 import { ApiMessage } from '../enums/api-message.enum.js';
+import { buildRequestOrigin } from '../upload/public-url.util.js';
 import { serializeToDto } from '../utils/serialize.js';
 
 export interface SuccessResponseBody<T> {
@@ -33,7 +35,10 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
   T,
   SuccessResponseBody<T>
 > {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly configService: ConfigService,
+  ) {}
 
   intercept(
     context: ExecutionContext,
@@ -56,12 +61,17 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
       [context.getHandler(), context.getClass()],
     );
 
+    const publicOrigin = buildRequestOrigin(
+      request,
+      this.configService.get<string>('APP_URL'),
+    );
+
     return next.handle().pipe(
       map((data) => ({
         // Read after the handler ran so @HttpCode and the method default apply.
         statusCode: response.statusCode,
         message,
-        data: (dto ? serializeToDto(data, dto) : data) as T,
+        data: (dto ? serializeToDto(data, dto, { publicOrigin }) : data) as T,
       })),
     );
   }
