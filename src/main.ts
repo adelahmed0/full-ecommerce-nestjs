@@ -13,7 +13,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
-  const uploadDir = resolve(configService.get<string>('UPLOAD_DIR') ?? 'uploads');
+  const uploadDir = resolve(
+    configService.get<string>('UPLOAD_DIR') ?? 'uploads',
+  );
   const uploadPublicBasePath =
     configService.get<string>('UPLOAD_PUBLIC_BASE_PATH') ?? '/uploads';
 
