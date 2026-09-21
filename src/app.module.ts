@@ -4,6 +4,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { MultipartFilesInterceptor } from './common/upload/multipart-files.interceptor.js';
+import { UploadModule } from './common/upload/upload.module.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { MailModule } from './mail/mail.module.js';
@@ -34,6 +35,7 @@ import { CategoriesModule } from './categories/categories.module.js';
         },
       }),
     }),
+    UploadModule,
     MailModule,
     UsersModule,
     AuthModule,

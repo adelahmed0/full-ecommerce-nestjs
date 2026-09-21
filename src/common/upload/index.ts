@@ -6,6 +6,9 @@ export type {
 } from './upload.types.js';
 export { ParseFormFilesPipe, parseFormFiles } from './parse-form-files.pipe.js';
 export {
+  FormFiles,
   UploadedFormFile,
   UploadedFormFiles,
 } from './uploaded-files.decorator.js';
+export { LocalFileStorageService } from './local-file-storage.service.js';
+export { UploadModule } from './upload.module.js';

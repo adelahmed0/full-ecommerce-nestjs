@@ -19,6 +19,14 @@ function getFiles(request: RequestWithFiles): UploadedMulterFile[] {
   return Object.values(request.files).flat();
 }
 
+/** All uploaded files on the request (no validation — use ParseFormFilesPipe). */
+export const FormFiles = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): UploadedMulterFile[] => {
+    const request = ctx.switchToHttp().getRequest<RequestWithFiles>();
+    return getFiles(request);
+  },
+);
+
 /** Extract one file by field name (no validation — use ParseFormFilesPipe). */
 export const UploadedFormFile = createParamDecorator(
   (

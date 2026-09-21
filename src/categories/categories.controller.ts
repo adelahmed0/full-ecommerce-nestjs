@@ -19,6 +19,19 @@ import { UserRole } from '../users/enums/user.enum.js';
 import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
 import { Serialize } from '../common/decorators/serialize.decorator.js';
 import { ApiMessage } from '../common/enums/api-message.enum.js';
+import { FormFiles } from '../common/upload/uploaded-files.decorator.js';
+import { IMAGE_MIME_TYPES } from '../common/upload/upload.constants.js';
+import { parseFormFiles } from '../common/upload/parse-form-files.pipe.js';
+import type { FormFileFieldsResult } from '../common/upload/upload.types.js';
+
+const categoryImageFiles = parseFormFiles([
+  {
+    name: 'image',
+    maxCount: 1,
+    required: false,
+    mimeTypes: IMAGE_MIME_TYPES,
+  },
+]);
 
 @Controller('categories')
 export class CategoriesController {
@@ -29,8 +42,11 @@ export class CategoriesController {
   @Roles([UserRole.ADMIN])
   @Serialize(CategoryResponseDto)
   @ResponseMessage(ApiMessage.CATEGORY_CREATED)
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @FormFiles(categoryImageFiles) files: FormFileFieldsResult,
+  ) {
+    return this.categoriesService.create(createCategoryDto, files.image[0]);
   }
 
   @Get()
@@ -55,8 +71,13 @@ export class CategoriesController {
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @FormFiles(categoryImageFiles) files: FormFileFieldsResult,
   ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+    return this.categoriesService.update(
+      id,
+      updateCategoryDto,
+      files.image[0],
+    );
   }
 
   @Delete(':id')

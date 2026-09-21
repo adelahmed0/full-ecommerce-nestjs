@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
@@ -15,6 +16,9 @@ export class CreateCategoryDto {
   name: string;
 
   @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    value === '' || value === null ? undefined : value,
+  )
   @IsString({ message: 'Image must be a string' })
   @IsUrl({}, { message: 'Image must be a valid URL' })
   image?: string | null;
