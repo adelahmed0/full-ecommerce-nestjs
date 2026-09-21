@@ -46,7 +46,9 @@ import { CategoriesModule } from './categories/categories.module.js';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: MultipartFilesInterceptor,
+      useFactory: (configService: ConfigService) =>
+        new MultipartFilesInterceptor(configService),
+      inject: [ConfigService],
     },
   ],
 })
